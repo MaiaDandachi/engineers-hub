@@ -1,5 +1,15 @@
 import React from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
-const App: React.FC = () => <div className='text-red-300'>Eng. Hub</div>;
+import { HomePage } from './pages/HomePage/HomePage';
+import { LoginPage } from './pages/LoginPage/LoginPage';
+
+const App: React.FC = () => (
+  <Router>
+    <div>Header</div>
+    <Route path='/' component={HomePage} exact />
+    <Route path='/login' component={LoginPage} />
+  </Router>
+);
 
 export default App;
