@@ -6,7 +6,6 @@ import { LoginPage } from './pages/LoginPage/LoginPage';
 
 const App: React.FC = () => (
   <Router>
-    <div>Header</div>
     <Route path='/' component={HomePage} exact />
     <Route path='/login' component={LoginPage} />
   </Router>
