@@ -2,3 +2,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  .login-container {
+    @apply bg-gray-100 min-h-screen pt-10 md:pt-20 pb-6 px-2 md:px-0;
+  }
+
+  .login-card {
+    @apply bg-white max-w-lg mx-auto p-8 md:p-12 my-10 rounded-lg shadow-2xl;
+  }
+
+  .login-card__input {
+    @apply ml-0 bg-gray-200 rounded w-full text-gray-700 focus:outline-none border-b-4 border-gray-300 focus:border-purple-700 transition duration-500 px-3;
+  }
+
+  .login-card__submit {
+    @apply bg-purple-700 hover:bg-purple-800 text-white font-bold py-2 rounded shadow-lg hover:shadow-xl transition duration-200;
+  }
+}
