@@ -1,8 +1,15 @@
 import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { uuid } from 'uuidv4';
+
+import { useAppDispatch } from '../../redux-features/hooks';
+import { registerUser } from '../../redux-features/users';
 
 export const RegisterPage: React.FC = () => {
+  const dispatch = useAppDispatch();
   const formik = useFormik({
     initialValues: {
       userName: '',
@@ -16,21 +23,65 @@ export const RegisterPage: React.FC = () => {
       password: Yup.string().min(8, 'Must be 8 characters or more').required('Required'),
       confirmPassword: Yup.string().oneOf([Yup.ref('password')], 'Passwords must match'),
     }),
-    onSubmit: (values, { resetForm }) => {
-      fetch('/api/users', {
-        method: 'POST',
-        body: JSON.stringify(values),
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
+    onSubmit: async (values, { resetForm }) => {
+      const resultAction = await dispatch(
+        registerUser({
+          id: uuid(),
+          email: values.email,
+          userName: values.userName,
+        })
+      );
+
+      if (registerUser.fulfilled.match(resultAction)) {
+        // user will have a type signature of User as we passed that as the Returned parameter in createAsyncThunk
+        const user = resultAction.payload;
+        toast.success(
+          <div>
+            Success
+            <br />
+            <span>Registered: {user.userName}</span>
+          </div>,
+          {
+            position: toast.POSITION.TOP_RIGHT,
+          }
+        );
+      }
+
+      if (registerUser.rejected.match(resultAction)) {
+        if (resultAction.payload) {
+          // if the error is sent from server payload
+          toast.error(
+            <div>
+              Error
+              <br />
+              {resultAction.payload.errorMessage}
+            </div>,
+
+            {
+              position: toast.POSITION.TOP_RIGHT,
+            }
+          );
+        } else {
+          toast.error(
+            <div>
+              Error
+              <br />
+              {resultAction.error}
+            </div>,
+            {
+              position: toast.POSITION.TOP_RIGHT,
+            }
+          );
+        }
+      }
+
       resetForm();
     },
   });
 
   return (
     <div className='auth-container'>
+      <ToastContainer />
       <header className='max-w-lg mx-auto'>
         <h1 className='text-4xl text-center font-bold text-purple-700'>Engineers Hub</h1>
       </header>
