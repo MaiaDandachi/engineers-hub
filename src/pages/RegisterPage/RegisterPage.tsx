@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { uuid } from 'uuidv4';
+import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline';
 
 import { useAppDispatch } from '../../redux-features/hooks';
 import { registerUser } from '../../redux-features/users';
 
 export const RegisterPage: React.FC = () => {
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+
   const dispatch = useAppDispatch();
+
   const formik = useFormik({
     initialValues: {
       userName: '',
@@ -128,12 +133,12 @@ export const RegisterPage: React.FC = () => {
             {formik.touched.email && formik.errors.email ? (
               <div className='mb-3 text-red-500'>{formik.errors.email}</div>
             ) : null}
-            <div className='mb-3 pt-3 rounded bg-gray-200'>
+            <div className='mb-3 pt-3 rounded bg-gray-200 relative'>
               <label htmlFor='password' className='block text-gray-700 text-sm font-bold mb-2 ml-3'>
                 Password
               </label>
               <input
-                type='password'
+                type={showPwd ? 'text' : 'password'}
                 id='password'
                 name='password'
                 className='auth-card__input'
@@ -141,16 +146,27 @@ export const RegisterPage: React.FC = () => {
                 onBlur={formik.handleBlur}
                 value={formik.values.password}
               />
+              {showPwd ? (
+                <EyeIcon
+                  className='w-5 h-5 right-3 top-9 text-purple-700 absolute'
+                  onClick={() => setShowPwd(!showPwd)}
+                />
+              ) : (
+                <EyeOffIcon
+                  className='w-5 h-5 right-3 top-9  text-purple-700 absolute'
+                  onClick={() => setShowPwd(!showPwd)}
+                />
+              )}
             </div>
             {formik.touched.password && formik.errors.password ? (
               <div className='mb-3 text-red-500'>{formik.errors.password}</div>
             ) : null}
-            <div className='mb-3 pt-3 rounded bg-gray-200'>
+            <div className='mb-3 pt-3 rounded bg-gray-200 relative'>
               <label htmlFor='password' className='block text-gray-700 text-sm font-bold mb-2 ml-3'>
                 Confirm Password
               </label>
               <input
-                type='password'
+                type={showConfirmPwd ? 'text' : 'password'}
                 id='confirmPassword'
                 name='confirmPassword'
                 className='auth-card__input'
@@ -158,6 +174,17 @@ export const RegisterPage: React.FC = () => {
                 onBlur={formik.handleBlur}
                 value={formik.values.confirmPassword}
               />
+              {showConfirmPwd ? (
+                <EyeIcon
+                  className='w-5 h-5 right-3 top-9 text-purple-700 absolute'
+                  onClick={() => setShowConfirmPwd(!showConfirmPwd)}
+                />
+              ) : (
+                <EyeOffIcon
+                  className='w-5 h-5 right-3 top-9 text-purple-700 absolute'
+                  onClick={() => setShowConfirmPwd(!showConfirmPwd)}
+                />
+              )}
             </div>
             {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
               <div className='mb-3 text-red-500'>{formik.errors.confirmPassword}</div>
