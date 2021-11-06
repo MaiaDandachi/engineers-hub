@@ -6,6 +6,7 @@ interface User {
   id: string;
   userName: string;
   email: string;
+  password: string;
 }
 
 interface ValidationErrors {
@@ -33,16 +34,17 @@ export const registerUser = createAsyncThunk<
   }
 >('users/register', async (userData, { rejectWithValue }) => {
   try {
-    const { id, userName, email } = userData;
+    const { id, userName, email, password } = userData;
     const config = {
       headers: {
         'Content-Type': 'application/json',
       },
     };
 
-    const response = await axios.post<RegisterUserResponse>('/api/users', { id, userName, email }, config);
+    const response = await axios.post<RegisterUserResponse>('/api/users', { id, userName, email, password }, config);
 
     return response.data.user;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     const error: AxiosError<ValidationErrors> = err;
     if (!error.response) {

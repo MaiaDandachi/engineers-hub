@@ -22,16 +22,14 @@ app.post('/api/users', (req, res) => {
     id: req.body.id,
     userName: req.body.userName,
     email: req.body.email,
+    password: req.body.password,
   };
   users.push(newUser);
   fs.writeFileSync(DATA_FILE, JSON.stringify(users));
 
-  if (req.body.password) {
-    res.status(401);
-    throw new Error('password should not be sent');
-  }
-
-  res.status(201).json({ user: newUser });
+  const userResponse = { ...newUser };
+  delete userResponse.password;
+  res.status(201).json({ user: userResponse });
 });
 
 const notFound = (req, res, next) => {

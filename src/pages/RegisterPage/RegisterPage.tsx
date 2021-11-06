@@ -29,6 +29,7 @@ export const RegisterPage: React.FC = () => {
           id: uuid(),
           email: values.email,
           userName: values.userName,
+          password: values.password,
         })
       );
 
