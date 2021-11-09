@@ -98,7 +98,7 @@ export const RegisterPage: React.FC = () => {
         </section>
 
         <div className='mt-8'>
-          <form className='flex flex-col' onSubmit={formik.handleSubmit}>
+          <form className='flex flex-col' onSubmit={formik.handleSubmit} id='signup-form'>
             <div className='mb-3 pt-3 rounded bg-gray-200'>
               <label htmlFor='userName' className='block text-gray-700 text-sm font-bold mb-2 ml-3'>
                 UserName
