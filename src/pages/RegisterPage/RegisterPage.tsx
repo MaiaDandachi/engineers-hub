@@ -131,7 +131,9 @@ export const RegisterPage: React.FC = () => {
               />
             </div>
             {formik.touched.email && formik.errors.email ? (
-              <div className='mb-3 text-red-500'>{formik.errors.email}</div>
+              <div className='mb-3 text-red-500' id='emailError'>
+                {formik.errors.email}
+              </div>
             ) : null}
             <div className='mb-3 pt-3 rounded bg-gray-200 relative'>
               <label htmlFor='password' className='block text-gray-700 text-sm font-bold mb-2 ml-3'>
@@ -153,13 +155,16 @@ export const RegisterPage: React.FC = () => {
                 />
               ) : (
                 <EyeOffIcon
+                  id='showPassword'
                   className='w-5 h-5 right-3 top-9  text-purple-700 absolute'
                   onClick={() => setShowPwd(!showPwd)}
                 />
               )}
             </div>
             {formik.touched.password && formik.errors.password ? (
-              <div className='mb-3 text-red-500'>{formik.errors.password}</div>
+              <div className='mb-3 text-red-500' id='passwordError'>
+                {formik.errors.password}
+              </div>
             ) : null}
             <div className='mb-3 pt-3 rounded bg-gray-200 relative'>
               <label htmlFor='password' className='block text-gray-700 text-sm font-bold mb-2 ml-3'>
