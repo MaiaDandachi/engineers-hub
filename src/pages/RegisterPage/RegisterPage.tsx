@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
@@ -6,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { uuid } from 'uuidv4';
 import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline';
 
-import { useAppDispatch } from '../../redux-features/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
 import { registerUser } from '../../redux-features/users';
 
 export const RegisterPage: React.FC = () => {
@@ -14,6 +15,9 @@ export const RegisterPage: React.FC = () => {
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
 
   const dispatch = useAppDispatch();
+  const history = useHistory();
+
+  const { userInfo } = useAppSelector((state) => state.users);
 
   const formik = useFormik({
     initialValues: {
@@ -28,7 +32,7 @@ export const RegisterPage: React.FC = () => {
       password: Yup.string().min(8, 'Must be 8 characters or more').required('Required'),
       confirmPassword: Yup.string().oneOf([Yup.ref('password')], 'Passwords must match'),
     }),
-    onSubmit: async (values, { resetForm }) => {
+    onSubmit: async (values) => {
       const resultAction = await dispatch(
         registerUser({
           id: uuid(),
@@ -37,21 +41,6 @@ export const RegisterPage: React.FC = () => {
           password: values.password,
         })
       );
-
-      if (registerUser.fulfilled.match(resultAction)) {
-        // user will have a type signature of User as we passed that as the Returned parameter in createAsyncThunk
-        const user = resultAction.payload;
-        toast.success(
-          <div>
-            Success
-            <br />
-            <span>Registered: {user.userName}</span>
-          </div>,
-          {
-            position: toast.POSITION.TOP_RIGHT,
-          }
-        );
-      }
 
       if (registerUser.rejected.match(resultAction)) {
         if (resultAction.payload) {
@@ -80,10 +69,14 @@ export const RegisterPage: React.FC = () => {
           );
         }
       }
-
-      resetForm();
     },
   });
+
+  useEffect(() => {
+    if (userInfo) {
+      history.push('/');
+    }
+  }, [history, userInfo]);
 
   return (
     <div className='auth-container'>
@@ -202,11 +195,10 @@ export const RegisterPage: React.FC = () => {
       </div>
       <div className='max-w-lg mx-auto text-center mb-5'>
         <p>
-          Already a member?
-          <a className='hover:text-purple-800' href='/login'>
-            {' '}
+          Already a member?{' '}
+          <Link to='/login' className='hover:text-purple-800'>
             Sign In
-          </a>
+          </Link>
         </p>
       </div>
     </div>
