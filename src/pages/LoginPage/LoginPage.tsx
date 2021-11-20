@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
+import { loginUser } from '../../redux-features/users';
 
 export const LoginPage: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const history = useHistory();
+
+  const { userInfo } = useAppSelector((state) => state.users);
+
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -12,20 +23,53 @@ export const LoginPage: React.FC = () => {
       email: Yup.string().email('Invalid email address').required('Required'),
       password: Yup.string().min(8, 'Must be 8 characters or more').required('Required'),
     }),
-    onSubmit: (values) => {
-      fetch('/api/users', {
-        method: 'POST',
-        body: JSON.stringify(values),
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
+    onSubmit: async (values) => {
+      const resultAction = await dispatch(
+        loginUser({
+          email: values.email,
+          password: values.password,
+        })
+      );
+
+      if (loginUser.rejected.match(resultAction)) {
+        if (resultAction.payload) {
+          // if the error is sent from server payload
+          toast.error(
+            <div>
+              Error
+              <br />
+              {resultAction.payload.errorMessage}
+            </div>,
+
+            {
+              position: toast.POSITION.TOP_RIGHT,
+            }
+          );
+        } else {
+          toast.error(
+            <div>
+              Error
+              <br />
+              {resultAction.error}
+            </div>,
+            {
+              position: toast.POSITION.TOP_RIGHT,
+            }
+          );
+        }
+      }
     },
   });
 
+  useEffect(() => {
+    if (userInfo) {
+      history.push('/');
+    }
+  }, [history, userInfo]);
+
   return (
     <div className='auth-container'>
+      <ToastContainer />
       <header className='max-w-lg mx-auto'>
         <h1 className='text-4xl text-center font-bold text-purple-700'>Engineers Hub</h1>
       </header>
@@ -83,10 +127,9 @@ export const LoginPage: React.FC = () => {
       <div className='max-w-lg mx-auto text-center mb-5'>
         <p>
           Don&apos;t have an account?
-          <a className='hover:text-purple-800' href='/register'>
-            {' '}
+          <Link to='/register' className='hover:text-purple-800'>
             Sign Up
-          </a>
+          </Link>
         </p>
       </div>
     </div>

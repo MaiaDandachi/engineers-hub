@@ -8,25 +8,22 @@ interface User {
   email: string;
   password: string;
 }
-
 interface ValidationErrors {
   errorMessage: string;
 }
-
-interface RegisterUserResponse {
-  user: User;
+interface UserResponse {
+  user: { email: string; id: string; userName: string };
 }
-
 interface UsersState {
   error: string | null | undefined;
   userInfo: Partial<User>;
 }
 
+// Register //
 export const registerUser = createAsyncThunk<
   // Return type of the payload creator
-  User,
-  // First argument to the payload creator
-  // { id: string } & Partial<User>, // id is a must but the rest of User interface is optional
+  { email: string; id: string; userName: string },
+  // userData obj type
   User,
   {
     // Optional fields for defining thunkApi field types
@@ -41,7 +38,39 @@ export const registerUser = createAsyncThunk<
       },
     };
 
-    const response = await axios.post<RegisterUserResponse>('/api/users', { id, userName, email, password }, config);
+    const response = await axios.post<UserResponse>('/api/users/register', { id, userName, email, password }, config);
+
+    return response.data.user;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    const error: AxiosError<ValidationErrors> = err;
+    if (!error.response) {
+      throw err;
+    }
+    return rejectWithValue(error.response.data);
+  }
+});
+
+// Login //
+export const loginUser = createAsyncThunk<
+  // Return type of the payload creator
+  { email: string; id: string; userName: string },
+  // userData obj type
+  { email: string; password: string },
+  {
+    // Optional fields for defining thunkApi field types
+    rejectValue: ValidationErrors;
+  }
+>('users/login', async (userData, { rejectWithValue }) => {
+  try {
+    const { email, password } = userData;
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const response = await axios.post<UserResponse>('/api/users/login', { email, password }, config);
 
     return response.data.user;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,6 +100,18 @@ const usersSlice = createSlice({
       state.userInfo = payload;
     });
     builder.addCase(registerUser.rejected, (state, action) => {
+      if (action.payload) {
+        // Being that we passed in ValidationErrors to rejectType
+        // in `createAsyncThunk`, the payload will be available here.
+        state.error = action.payload.errorMessage;
+      } else {
+        state.error = action.error.message;
+      }
+    });
+    builder.addCase(loginUser.fulfilled, (state, { payload }) => {
+      state.userInfo = payload;
+    });
+    builder.addCase(loginUser.rejected, (state, action) => {
       if (action.payload) {
         // Being that we passed in ValidationErrors to rejectType
         // in `createAsyncThunk`, the payload will be available here.
