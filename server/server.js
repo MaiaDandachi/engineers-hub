@@ -55,7 +55,7 @@ app.post('/api/users/login', (req, res) => {
   const userResponse = { ...loggedUser };
   delete userResponse.password;
 
-  if (loggedUser.length > 0) {
+  if (loggedUser) {
     res.status(201).json({ user: userResponse });
   } else {
     res.status(401);
