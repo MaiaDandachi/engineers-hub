@@ -6,6 +6,7 @@ const app = express();
 app.use(express.json());
 
 const DATA_FILE = path.join(__dirname, 'data/users.json');
+const POSTS_DATA_FILE = path.join(__dirname, 'data/posts.json');
 
 app.get('/', (req, res) => {
   res.send('API IS RUNNING...');
@@ -60,6 +61,76 @@ app.post('/api/users/login', (req, res) => {
   } else {
     res.status(401);
     throw new Error('Invalid email or password');
+  }
+});
+
+app.get('/api/posts', (req, res) => {
+  const data = fs.readFileSync(POSTS_DATA_FILE);
+  res.json({ posts: JSON.parse(data) });
+});
+
+app.post('/api/posts', (req, res) => {
+  const { id, postUserInfo, title, content } = req.body;
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+
+  const newPost = {
+    id,
+    postUserInfo,
+    title,
+    content,
+  };
+
+  const isNewPostAlreadyWritten = posts.some(
+    (post) => post.postUserInfo.id === newPost.postUserInfo.id && post.title === title
+  );
+
+  if (isNewPostAlreadyWritten) {
+    res.status(400);
+    throw new Error('Post already exists');
+  }
+
+  posts.push(newPost);
+  fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+
+  // const responsePost = { ...newPost };
+  // delete responsePost.postUserInfo;
+
+  res.status(201).json({ post: newPost });
+});
+
+app.put('/api/posts/:id', (req, res) => {
+  const { postUserInfo, title, content } = req.body;
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+
+  const foundPostIndex = posts.findIndex((post) => post.id === Number(req.params.id));
+
+  if (foundPostIndex !== -1) {
+    if (posts[foundPostIndex].postUserInfo.id !== postUserInfo.id) {
+      res.status(401);
+      throw new Error('logged in user is not the post owner.');
+    }
+    const updatedPost = { ...posts[foundPostIndex], title, content };
+    posts[foundPostIndex] = updatedPost;
+    fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+
+    // delete updatedPost.postUserInfo;
+
+    res.json(updatedPost);
+  } else {
+    res.status(404);
+    throw new Error('Post not found');
+  }
+});
+
+app.get('/api/posts/:id', (req, res) => {
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+
+  const foundPost = posts.find((post) => post.id === Number(req.params.id));
+
+  if (foundPost) {
+    res.json(foundPost);
+  } else {
+    res.status(404).json({ message: 'Post not found!' });
   }
 });
 
