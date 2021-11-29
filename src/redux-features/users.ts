@@ -8,23 +8,30 @@ interface User {
   email: string;
   password: string;
 }
+
 interface ValidationErrors {
   errorMessage: string;
 }
+
 interface UserResponse {
-  user: { email: string; id: string; userName: string };
-}
-interface UsersState {
-  error: string | null | undefined;
-  userInfo: Partial<User> | null;
+  user: {
+    id: string;
+    userName: string;
+    email: string;
+  };
 }
 
-// Register //
+interface UsersState {
+  error: string | null | undefined;
+  userInfo: Partial<User>;
+}
+
 export const registerUser = createAsyncThunk<
   // Return type of the payload creator
-  { email: string; id: string; userName: string },
-  // userData obj type
+  { id: string; userName: string; email: string },
+  // userData object type
   User,
+  // { id: string } & Partial<User>, // id is a must but the rest of User interface is optional
   {
     // Optional fields for defining thunkApi field types
     rejectValue: ValidationErrors;
@@ -38,7 +45,7 @@ export const registerUser = createAsyncThunk<
       },
     };
 
-    const response = await axios.post<UserResponse>('/api/users/register', { id, userName, email, password }, config);
+    const response = await axios.post<UserResponse>('/api/users', { id, userName, email, password }, config);
 
     localStorage.setItem('userInfo', JSON.stringify(response.data.user));
 
@@ -53,11 +60,10 @@ export const registerUser = createAsyncThunk<
   }
 });
 
-// Login //
 export const loginUser = createAsyncThunk<
   // Return type of the payload creator
-  { email: string; id: string; userName: string },
-  // userData obj type
+  { id: string; userName: string; email: string },
+  // userData object type
   { email: string; password: string },
   {
     // Optional fields for defining thunkApi field types
@@ -88,7 +94,7 @@ export const loginUser = createAsyncThunk<
 });
 
 const initialState: UsersState = {
-  userInfo: null,
+  userInfo: {},
   error: null,
 };
 
@@ -97,14 +103,13 @@ const usersSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state.userInfo = null;
+      state.userInfo = {};
     },
   },
   extraReducers: (builder) => {
     // The `builder` callback form is used here
     // because it provides correctly typed reducers from the action creators
     builder.addCase(registerUser.fulfilled, (state, { payload }) => {
-      // state.entities.push(payload);
       state.userInfo = payload;
     });
     builder.addCase(registerUser.rejected, (state, action) => {
@@ -116,6 +121,7 @@ const usersSlice = createSlice({
         state.error = action.error.message;
       }
     });
+
     builder.addCase(loginUser.fulfilled, (state, { payload }) => {
       state.userInfo = payload;
     });

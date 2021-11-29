@@ -26,7 +26,7 @@ export const HomePage: React.FC = () => {
   const history = useHistory();
 
   useEffect(() => {
-    if (!userInfo) {
+    if (userInfo && Object.keys(userInfo).length === 0) {
       history.push('/register');
     }
   }, [history, userInfo]);

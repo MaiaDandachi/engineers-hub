@@ -73,7 +73,7 @@ export const RegisterPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (userInfo) {
+    if (userInfo && Object.keys(userInfo).length === 0) {
       history.push('/');
     }
   }, [history, userInfo]);
