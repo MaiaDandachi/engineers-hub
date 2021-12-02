@@ -45,7 +45,7 @@ export const registerUser = createAsyncThunk<
       },
     };
 
-    const response = await axios.post<UserResponse>('/api/users', { id, userName, email, password }, config);
+    const response = await axios.post<UserResponse>('/api/users/register', { id, userName, email, password }, config);
 
     localStorage.setItem('userInfo', JSON.stringify(response.data.user));
 

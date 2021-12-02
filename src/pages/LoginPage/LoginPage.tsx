@@ -62,7 +62,7 @@ export const LoginPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (userInfo && Object.keys(userInfo).length === 0) {
+    if (userInfo && Object.keys(userInfo).length !== 0) {
       history.push('/');
     }
   }, [history, userInfo]);
