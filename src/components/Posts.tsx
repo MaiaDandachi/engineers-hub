@@ -4,16 +4,25 @@ import { Post } from './Post';
 
 interface IPosts {
   posts: Array<{
+    id: string;
     title: string;
     content: string;
-    author: string;
-    publishedDate: string;
+    postUserInfo: {
+      id: string;
+      userName: string;
+    };
   }>;
 }
 export const Posts: React.FC<IPosts> = ({ posts }) => (
-  <div>
-    {posts.map((post, index) => (
-      <Post key={index.toString()} post={post} />
+  <>
+    {posts.map((item, idx) => (
+      <Post
+        id={item.id}
+        key={idx.toString()}
+        title={item.title}
+        content={item.content}
+        postUserInfo={item.postUserInfo}
+      />
     ))}
-  </div>
+  </>
 );
