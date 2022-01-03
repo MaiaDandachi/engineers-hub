@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { uuid } from 'uuidv4';
+import { v4 as uuidV4 } from 'uuid';
 import { ToastContainer, toast } from 'react-toastify';
 
 import { useAppDispatch, useAppSelector } from '../redux-features/hooks';
@@ -31,7 +31,7 @@ const Modal: React.FC<IModalProps> = ({ postId = '', modalTitle, modalAction, on
     if (userInfo) {
       const resultAction = await dispatch(
         createPost({
-          id: uuid(),
+          id: uuidV4(),
           postUserInfo: { id: id || '', userName: userName || '' },
           title: state.title,
           content: state.content,
