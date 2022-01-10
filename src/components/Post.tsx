@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import { PencilAltIcon, TrashIcon } from '@heroicons/react/outline';
 import { useAppDispatch, useAppSelector } from '../redux-features/hooks';
 
-import Modal from './Modal';
 import { deletePost } from '../redux-features/posts';
 
 interface IPost {
@@ -14,11 +13,11 @@ interface IPost {
     id: string;
     userName: string;
   };
+  openEditModal: (id: string) => void;
 }
 
-export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo }) => {
+export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEditModal }) => {
   const { userInfo } = useAppSelector((state) => state.users);
-  const [isEditPostModalOpen, setIsEditPostModalOpen] = useState(false);
   const dispatch = useAppDispatch();
 
   const handlePostDelete = async () => {
@@ -85,7 +84,7 @@ export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo }) => {
                 />
                 <PencilAltIcon
                   className='w-5 h-5 right-10 bottom-4 absolute hover:text-purple-600'
-                  onClick={() => setIsEditPostModalOpen(true)}
+                  onClick={() => openEditModal(id)}
                 />
               </>
             )}
@@ -93,9 +92,6 @@ export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo }) => {
         </div>
       </div>
       <ToastContainer />
-      {isEditPostModalOpen && (
-        <Modal postId={id} modalTitle='Edit Post' modalAction='Edit' onClose={() => setIsEditPostModalOpen(false)} />
-      )}
     </>
   );
 };
