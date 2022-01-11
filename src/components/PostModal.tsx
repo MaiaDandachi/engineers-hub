@@ -5,7 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '../redux-features/hooks';
 import { createPost, editPost } from '../redux-features/posts';
 
-interface IModalProps {
+interface IPostModalProps {
   // eslint-disable-next-line react/require-default-props
   postId?: string;
   modalTitle: string;
@@ -18,7 +18,7 @@ interface IState {
   content: string;
 }
 
-const Modal: React.FC<IModalProps> = ({ postId = '', modalTitle, modalAction, onClose }) => {
+const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAction, onClose }) => {
   const [state, setState] = useState<IState>({
     title: '',
     content: '',
@@ -184,4 +184,4 @@ const Modal: React.FC<IModalProps> = ({ postId = '', modalTitle, modalAction, on
   );
 };
 
-export default Modal;
+export default PostModal;

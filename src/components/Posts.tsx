@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { Post } from './Post';
-import Modal from './Modal';
+import PostModal from './PostModal';
 
 interface IPosts {
   posts: Array<{
@@ -15,12 +15,12 @@ interface IPosts {
   }>;
 }
 export const Posts: React.FC<IPosts> = ({ posts }) => {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditPostModalOpen, setIsEditPostModalOpen] = useState(false);
   const [clickedPostId, setClickedPostId] = useState('');
 
   const getPostId = (postId: string) => {
     setClickedPostId(postId);
-    setIsEditModalOpen(true);
+    setIsEditPostModalOpen(true);
   };
 
   return (
@@ -32,16 +32,16 @@ export const Posts: React.FC<IPosts> = ({ posts }) => {
           title={item.title}
           content={item.content}
           postUserInfo={item.postUserInfo}
-          openEditModal={(id: string) => getPostId(id)}
+          openEditPostModal={(id: string) => getPostId(id)}
         />
       ))}
 
-      {isEditModalOpen && (
-        <Modal
+      {isEditPostModalOpen && (
+        <PostModal
           postId={clickedPostId}
           modalTitle='Edit Post'
           modalAction='Edit'
-          onClose={() => setIsEditModalOpen(false)}
+          onClose={() => setIsEditPostModalOpen(false)}
         />
       )}
     </>

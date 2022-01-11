@@ -14,10 +14,10 @@ interface IPost {
     id: string;
     userName: string;
   };
-  openEditModal: (id: string) => void;
+  openEditPostModal: (id: string) => void;
 }
 
-export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEditModal }) => {
+export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEditPostModal }) => {
   const { userInfo } = useAppSelector((state) => state.users);
   const dispatch = useAppDispatch();
 
@@ -26,6 +26,7 @@ export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEd
   const handlePostLike = () => {
     setIsPostLiked(!isPostLiked);
   };
+
   const handlePostDelete = async () => {
     const resultAction = await dispatch(deletePost(id));
     if (deletePost.fulfilled.match(resultAction)) {
@@ -107,7 +108,7 @@ export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEd
                 />
                 <PencilAltIcon
                   className='w-5 h-5 right-10 bottom-4 absolute hover:text-purple-600'
-                  onClick={() => openEditModal(id)}
+                  onClick={() => openEditPostModal(id)}
                 />
               </>
             )}
