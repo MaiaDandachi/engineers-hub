@@ -8,6 +8,7 @@ app.use(express.json());
 
 const DATA_FILE = path.join(__dirname, 'data/users.json');
 const POSTS_DATA_FILE = path.join(__dirname, 'data/posts.json');
+const COMMENTS_DATA_FILE = path.join(__dirname, 'data/comments.json');
 
 app.get('/', (req, res) => {
   res.send('API IS RUNNING...');
@@ -75,7 +76,7 @@ app.post('/api/users/login', async (req, res) => {
     throw new Error('Could not hash the user password');
   }
 });
-
+//-------------------------------------------------------
 app.get('/api/posts', (req, res) => {
   const data = fs.readFileSync(POSTS_DATA_FILE);
   // using setTimeout so that the loader appears before loading data, like mocking a database.
@@ -158,6 +159,52 @@ app.delete('/api/posts/:id', (req, res) => {
   res.json({ message: 'Post removed', postId: req.params.id });
 });
 
+// -----------------------------------------------
+app.get('/api/posts/:postId/comments', (req, res) => {
+  const comments = fs.readFileSync(COMMENTS_DATA_FILE);
+
+  res.json({ comments: JSON.parse(comments) });
+});
+
+app.post('/api/posts/:postId/comments', (req, res) => {
+  const { id, userId, text, creationDate } = req.body;
+  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
+
+  const { postId } = req.params;
+
+  const newComment = {
+    id,
+    userId,
+    postId,
+    text,
+    creationDate,
+  };
+
+  const isNewCommentAlreadyWritten = comments.some(
+    (comment) => comment.userId === newComment.userId && comment.text === newComment.text
+  );
+
+  if (isNewCommentAlreadyWritten) {
+    res.status(400);
+    throw new Error('You have already commented on the post');
+  }
+
+  comments.push(newComment);
+  fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(comments));
+
+  res.status(201).json({ comment: newComment });
+});
+
+app.delete('/api/posts/:postId/comments/:id', (req, res) => {
+  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
+
+  const filteredComments = comments.filter((comment) => comment.id !== req.params.id);
+
+  fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(filteredComments));
+  res.json({ message: 'Comment removed', commentId: req.params.id });
+});
+
+// ----------------------------------------------
 const notFound = (req, res, next) => {
   console.log('NOT FOUND ERROR');
   const error = new Error(`Not Found - ${req.originalUrl}`);
