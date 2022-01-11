@@ -15,9 +15,10 @@ interface IPost {
     userName: string;
   };
   openEditPostModal: (id: string) => void;
+  openCommentModal: (id: string, postTitle: string) => void;
 }
 
-export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEditPostModal }) => {
+export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEditPostModal, openCommentModal }) => {
   const { userInfo } = useAppSelector((state) => state.users);
   const dispatch = useAppDispatch();
 
@@ -95,9 +96,12 @@ export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEd
 
             <div className='flex pl-2'>
               <button type='button'>
-                <AnnotationIcon className='w-5 h-5 left-12 bottom-4  hover:text-purple-600' />
+                <AnnotationIcon
+                  className='w-5 h-5 left-12 bottom-4  hover:text-purple-600'
+                  onClick={() => openCommentModal(id, title)}
+                />
               </button>
-              <span className='pl-1'>3 comments</span>
+              <span className='pl-1'>2 comments</span>
             </div>
 
             {userInfo.id === postUserInfo.id && (

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 import { Post } from './Post';
 import PostModal from './PostModal';
+import CommentModal from './CommentModal';
 
 interface IPosts {
   posts: Array<{
@@ -16,11 +17,19 @@ interface IPosts {
 }
 export const Posts: React.FC<IPosts> = ({ posts }) => {
   const [isEditPostModalOpen, setIsEditPostModalOpen] = useState(false);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [clickedPostId, setClickedPostId] = useState('');
+  const [clickedPostTitle, setClickedPostTitle] = useState('');
 
-  const getPostId = (postId: string) => {
+  const openPostEditModal = (postId: string) => {
     setClickedPostId(postId);
     setIsEditPostModalOpen(true);
+  };
+
+  const openCommentModal = (postId: string, postTitle: string) => {
+    setClickedPostId(postId);
+    setClickedPostTitle(postTitle);
+    setIsCommentModalOpen(true);
   };
 
   return (
@@ -32,7 +41,8 @@ export const Posts: React.FC<IPosts> = ({ posts }) => {
           title={item.title}
           content={item.content}
           postUserInfo={item.postUserInfo}
-          openEditPostModal={(id: string) => getPostId(id)}
+          openEditPostModal={(id: string) => openPostEditModal(id)}
+          openCommentModal={(id: string, postTitle: string) => openCommentModal(id, postTitle)}
         />
       ))}
 
@@ -43,6 +53,10 @@ export const Posts: React.FC<IPosts> = ({ posts }) => {
           modalAction='Edit'
           onClose={() => setIsEditPostModalOpen(false)}
         />
+      )}
+
+      {isCommentModalOpen && (
+        <CommentModal postId={clickedPostId} title={clickedPostTitle} onClose={() => setIsCommentModalOpen(false)} />
       )}
     </>
   );
