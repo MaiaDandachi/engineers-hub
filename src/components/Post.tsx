@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
-import { PencilAltIcon, TrashIcon } from '@heroicons/react/outline';
+import { PencilAltIcon, TrashIcon, AnnotationIcon, HeartIcon } from '@heroicons/react/outline';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/solid';
 import { useAppDispatch, useAppSelector } from '../redux-features/hooks';
 
 import { deletePost } from '../redux-features/posts';
@@ -20,6 +21,11 @@ export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEd
   const { userInfo } = useAppSelector((state) => state.users);
   const dispatch = useAppDispatch();
 
+  const [isPostLiked, setIsPostLiked] = useState(false);
+
+  const handlePostLike = () => {
+    setIsPostLiked(!isPostLiked);
+  };
   const handlePostDelete = async () => {
     const resultAction = await dispatch(deletePost(id));
     if (deletePost.fulfilled.match(resultAction)) {
@@ -72,9 +78,26 @@ export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEd
             <div className='text-gray-900 font-bold text-xl mb-2'>{title}</div>
             <p className='text-gray-700 text-base break-all '>{content}</p>
           </div>
+          <p className='px-5 py-2 text-purple-600 font-medium'>{postUserInfo.userName},</p>
 
-          <div className='text-sm p-5'>
-            <p className='text-purple-600 font-medium'>{postUserInfo.userName},</p>
+          <div className='text-sm px-5 pt-1 pb-5 flex'>
+            <div className='flex'>
+              <button type='button' className='hover:text-purple-600' onClick={handlePostLike}>
+                {isPostLiked ? (
+                  <HeartIconSolid className='w-5 h-5 left-5 bottom-4 text-purple-700' />
+                ) : (
+                  <HeartIcon className='w-5 h-5 left-5 bottom-4 ' />
+                )}
+              </button>
+              <span className='pl-1'>3 likes</span>
+            </div>
+
+            <div className='flex pl-2'>
+              <button type='button'>
+                <AnnotationIcon className='w-5 h-5 left-12 bottom-4  hover:text-purple-600' />
+              </button>
+              <span className='pl-1'>3 comments</span>
+            </div>
 
             {userInfo.id === postUserInfo.id && (
               <>
