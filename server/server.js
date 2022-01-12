@@ -161,27 +161,29 @@ app.delete('/api/posts/:id', (req, res) => {
 
 // -----------------------------------------------
 app.get('/api/posts/:postId/comments', (req, res) => {
-  const comments = fs.readFileSync(COMMENTS_DATA_FILE);
+  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
 
-  res.json({ comments: JSON.parse(comments) });
+  const filteredComments = comments.filter((comment) => comment.postId === req.params.postId);
+
+  res.json({ comments: filteredComments });
 });
 
 app.post('/api/posts/:postId/comments', (req, res) => {
-  const { id, userId, text, creationDate } = req.body;
+  const { id, commentUserInfo, text, creationDate } = req.body;
   const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
 
   const { postId } = req.params;
 
   const newComment = {
     id,
-    userId,
+    commentUserInfo,
     postId,
     text,
     creationDate,
   };
 
   const isNewCommentAlreadyWritten = comments.some(
-    (comment) => comment.userId === newComment.userId && comment.text === newComment.text
+    (comment) => comment.commentUserInfo.id === newComment.commentUserInfo.id && comment.text === newComment.text
   );
 
   if (isNewCommentAlreadyWritten) {
