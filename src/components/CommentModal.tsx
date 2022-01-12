@@ -1,17 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { getPostComments } from '../redux-features/comments';
+import { useAppSelector, useAppDispatch } from '../redux-features/hooks';
 
 interface ICommentModalProps {
   // eslint-disable-next-line react/require-default-props
-  postId?: string;
+  postId: string;
   title: string;
   onClose: () => void;
 }
 
 export const CommentModal: React.FC<ICommentModalProps> = ({ postId, title, onClose }) => {
-  const dummyComments = [
-    { user: 'John', comment: 'My 1st comment' },
-    { user: 'Kate', comment: 'Great post!' },
-  ];
+  const dispatch = useAppDispatch();
+
+  const comments = useAppSelector((state) => state.comments.comments);
+
+  useEffect(() => {
+    dispatch(getPostComments(postId));
+  }, [dispatch, postId]);
+
   return (
     <div
       onClick={() => onClose()}
@@ -63,12 +69,12 @@ export const CommentModal: React.FC<ICommentModalProps> = ({ postId, title, onCl
           </button>
         </div>
 
-        {dummyComments.map((comment) => (
+        {comments.map((comment) => (
           <>
             <div className='flex flex-col h-auto'>
-              <span className='text-purple-600 font-bold'>@{comment.user}</span>
+              <span className='text-purple-600 font-bold'>@{comment.commentUserInfo.userName}</span>
               <span className='text-gray-500 '>{new Date().toLocaleString().substring(0, 9)}</span>
-              <span>{comment.comment}</span>
+              <span>{comment.text}</span>
               <div className='flex-grow border-t my-3 opacity-25 border-purple-800' />
             </div>
           </>
