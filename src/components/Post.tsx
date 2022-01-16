@@ -10,6 +10,8 @@ interface IPost {
   id: string;
   title: string;
   content: string;
+  // eslint-disable-next-line react/require-default-props
+  commentsCount?: number;
   postUserInfo: {
     id: string;
     userName: string;
@@ -18,7 +20,15 @@ interface IPost {
   openCommentModal: (id: string, postTitle: string) => void;
 }
 
-export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEditPostModal, openCommentModal }) => {
+export const Post: React.FC<IPost> = ({
+  title,
+  content,
+  id,
+  postUserInfo,
+  commentsCount,
+  openEditPostModal,
+  openCommentModal,
+}) => {
   const { userInfo } = useAppSelector((state) => state.users);
   const dispatch = useAppDispatch();
 
@@ -101,7 +111,7 @@ export const Post: React.FC<IPost> = ({ title, content, id, postUserInfo, openEd
                   onClick={() => openCommentModal(id, title)}
                 />
               </button>
-              <span className='pl-1'>2 comments</span>
+              <span className='pl-1'>{commentsCount || 0} comments</span>
             </div>
 
             {userInfo.id === postUserInfo.id && (
