@@ -196,6 +196,20 @@ app.post('/api/posts/:postId/comments', (req, res) => {
   comments.push(newComment);
   fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(comments));
 
+  // When adding a comment increase comment count
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+
+  const commentedOnPostId = posts.findIndex((post) => post.id === postId);
+
+  const updatedPost = {
+    ...posts[commentedOnPostId],
+    commentsCount: posts[commentedOnPostId].commentsCount ? posts[commentedOnPostId].commentsCount + 1 : 1,
+  };
+
+  posts[commentedOnPostId] = updatedPost;
+
+  fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+
   res.status(201).json({ comment: newComment });
 });
 
