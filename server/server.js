@@ -186,7 +186,9 @@ app.post('/api/posts/:postId/comments', (req, res) => {
     (comment) => comment.commentUserInfo.id === newComment.commentUserInfo.id && comment.text === newComment.text
   );
 
-  if (isNewCommentAlreadyWritten) {
+  const isCommentWritteOnSamePost = comments.some((comment) => comment.postId === newComment.postId);
+
+  if (isNewCommentAlreadyWritten && isCommentWritteOnSamePost) {
     res.status(400);
     throw new Error('You have already commented on the post');
   }
