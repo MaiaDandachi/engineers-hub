@@ -6,7 +6,7 @@ import { useAppSelector, useAppDispatch } from '../../redux-features/hooks';
 
 import { Header } from '../../components/Header';
 import { Posts } from '../../components/Posts';
-import Modal from '../../components/Modal';
+import PostModal from '../../components/PostModal';
 import Loader from '../../components/Loader';
 import { getPosts } from '../../redux-features/posts';
 
@@ -84,7 +84,7 @@ export const HomePage: React.FC = () => {
         </div>
       )}
       {isCreatePostModalOpen && (
-        <Modal modalTitle='Add Post' modalAction='Create' onClose={() => setIsCreatePostModalOpen(false)} />
+        <PostModal modalTitle='Add Post' modalAction='Create' onClose={() => setIsCreatePostModalOpen(false)} />
       )}
     </>
   );
