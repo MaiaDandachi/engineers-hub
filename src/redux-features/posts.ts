@@ -12,6 +12,7 @@ interface Post {
   title: string;
   content: string;
   postUserInfo: User;
+  commentsCount?: number;
 }
 
 interface PostsState {
@@ -106,7 +107,6 @@ export const editPost = createAsyncThunk<
 >('posts/editPost', async (postData, { rejectWithValue }) => {
   try {
     const { id, title, content, postUserInfo } = postData;
-    console.log('id', id);
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ export const editPost = createAsyncThunk<
       },
       config
     );
-    console.log('res', response.data.post);
+
     return response.data.post;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
