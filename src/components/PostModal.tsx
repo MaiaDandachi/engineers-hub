@@ -129,7 +129,7 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
     >
       <ToastContainer />
       <div
-        className='bg-white p-3 w-2/6 cursor-default'
+        className='w-3/4 xs:w-2/6 bg-white p-3 cursor-default'
         role='button'
         onKeyDown={(e) => {
           //   console.log(e);

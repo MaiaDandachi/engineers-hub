@@ -31,7 +31,7 @@ export const CommentModal: React.FC<ICommentModalProps> = ({ postId, title, onCl
       tabIndex={0}
     >
       <div
-        className='bg-white p-3 w-2/6 cursor-default'
+        className='w-3/4 xs:w-2/6 bg-white p-3 cursor-default'
         role='button'
         onKeyDown={(e) => {
           //   console.log(e);
@@ -69,9 +69,9 @@ export const CommentModal: React.FC<ICommentModalProps> = ({ postId, title, onCl
           </button>
         </div>
 
-        {comments.map((comment) => (
+        {comments.map((comment, idx) => (
           <>
-            <div className='flex flex-col h-auto'>
+            <div key={idx.toString()} className='flex flex-col h-auto'>
               <span className='text-purple-600 font-bold'>@{comment.commentUserInfo.userName}</span>
               <span className='text-gray-500 '>{new Date().toLocaleString().substring(0, 9)}</span>
               <span>{comment.text}</span>
