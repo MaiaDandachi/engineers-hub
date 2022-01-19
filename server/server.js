@@ -162,28 +162,40 @@ app.delete('/api/posts/:id', (req, res) => {
 // -----------------------------------------------
 app.get('/api/posts/:postId/comments', (req, res) => {
   const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
+  const users = JSON.parse(fs.readFileSync(DATA_FILE));
 
   const filteredComments = comments.filter((comment) => comment.postId === req.params.postId);
 
-  res.json({ comments: filteredComments });
+  // populate userInfo for the comments
+  const userPopulatedComments = filteredComments.map((comment) => {
+    const commentUser = users.find((user) => user.id === comment.userId);
+    return {
+      ...comment,
+      userInfo: {
+        ...commentUser,
+      },
+    };
+  });
+
+  res.json({ comments: userPopulatedComments });
 });
 
 app.post('/api/posts/:postId/comments', (req, res) => {
-  const { id, commentUserInfo, text, creationDate } = req.body;
+  const { id, text, creationDate, userId } = req.body;
   const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
 
   const { postId } = req.params;
 
   const newComment = {
     id,
-    commentUserInfo,
     postId,
     text,
     creationDate,
+    userId,
   };
 
   const isNewCommentAlreadyWritten = comments.some(
-    (comment) => comment.commentUserInfo.id === newComment.commentUserInfo.id && comment.text === newComment.text
+    (comment) => comment.userId === newComment.userId && comment.text === newComment.text
   );
 
   const isCommentWritteOnSamePost = comments.some((comment) => comment.postId === newComment.postId);
