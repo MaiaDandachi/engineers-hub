@@ -12,7 +12,7 @@ interface ICommentModalProps {
 export const CommentModal: React.FC<ICommentModalProps> = ({ postId, title, onClose }) => {
   const dispatch = useAppDispatch();
 
-  const comments = useAppSelector((state) => state.comments.comments);
+  const { comments, isLoading } = useAppSelector((state) => state.comments);
 
   useEffect(() => {
     dispatch(getPostComments(postId));
@@ -69,16 +69,25 @@ export const CommentModal: React.FC<ICommentModalProps> = ({ postId, title, onCl
           </button>
         </div>
 
-        {comments.map((comment, idx) => (
-          <>
-            <div key={idx.toString()} className='flex flex-col h-auto'>
-              <span className='text-purple-600 font-bold'>@{comment.userInfo.userName}</span>
-              <span className='text-gray-500 '>{new Date().toLocaleString().substring(0, 9)}</span>
-              <span>{comment.text}</span>
-              <div className='flex-grow border-t my-3 opacity-25 border-purple-800' />
+        {isLoading ? (
+          <div className='flex animate-pulse flex-row items-center h-full justify-center space-x-5'>
+            <div className='flex flex-col space-y-3'>
+              <div className='w-36 bg-gray-300 h-6 rounded-md ' />
+              <div className='w-24 bg-gray-300 h-6 rounded-md ' />
             </div>
-          </>
-        ))}
+          </div>
+        ) : (
+          comments.map((comment, idx) => (
+            <>
+              <div key={idx.toString()} className='flex flex-col h-auto'>
+                <span className='text-purple-600 font-bold'>@{comment.userInfo.userName}</span>
+                <span className='text-gray-500 '>{new Date().toLocaleString().substring(0, 9)}</span>
+                <span>{comment.text}</span>
+                <div className='flex-grow border-t my-3 opacity-25 border-purple-800' />
+              </div>
+            </>
+          ))
+        )}
       </div>
     </div>
   );

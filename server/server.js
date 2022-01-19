@@ -177,7 +177,10 @@ app.get('/api/posts/:postId/comments', (req, res) => {
     };
   });
 
-  res.json({ comments: userPopulatedComments });
+  // using setTimeout so that the loader appears before loading data, like mocking a database.
+  setTimeout(() => {
+    res.json({ comments: userPopulatedComments });
+  }, 2000);
 });
 
 app.post('/api/posts/:postId/comments', (req, res) => {
