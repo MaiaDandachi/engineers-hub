@@ -1,17 +1,13 @@
 /* eslint-disable no-param-reassign */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios, { AxiosError } from 'axios';
-
-interface User {
-  id: string;
-  userName: string;
-}
+import { User } from './users';
 
 interface Comment {
   id: string;
   postId: string;
   text: string;
-  commentUserInfo: User;
+  userInfo: User;
   creationDate: string;
 }
 
