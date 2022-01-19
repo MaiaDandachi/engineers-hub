@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { mount, shallow, ReactWrapper } from 'enzyme';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
@@ -29,9 +30,11 @@ describe('RegisterPage', () => {
 
   beforeEach(() => {
     wrapper = mount(
-      <Provider store={store}>
-        <RegisterPage />
-      </Provider>
+      <Router>
+        <Provider store={store}>
+          <RegisterPage />
+        </Provider>
+      </Router>
     );
   });
 
