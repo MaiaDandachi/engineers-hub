@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import { ToastContainer, toast } from 'react-toastify';
 
-import { useAppDispatch, useAppSelector } from '../redux-features/hooks';
-import { createPost, editPost } from '../redux-features/posts';
+import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
+import { createPost, editPost } from '../../redux-features/posts';
 
 interface IPostModalProps {
   // eslint-disable-next-line react/require-default-props
@@ -111,7 +111,7 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, stateName: string) => {
-    const newInputValue = e.currentTarget.value;
+    const newInputValue = e.target.value;
     setState((currState) => ({ ...currState, [stateName]: newInputValue }));
   };
 
@@ -142,11 +142,11 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
         </h4>
         <div id='modal-body' className='bg-gray-50 p-4 my-2'>
           <div className='mb-3 pt-3 rounded bg-gray-200'>
-            <label className='block text-gray-700 text-sm font-bold mb-2 ml-3' htmlFor='title'>
+            <label className='block text-gray-700 text-sm font-bold mb-2 ml-3' htmlFor='post-title'>
               Title
             </label>
             <input
-              id='title'
+              id='post-title'
               type='text'
               className='auth-card__input'
               value={state.title}
@@ -154,11 +154,11 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
             />
           </div>
           <div className='mb-3 pt-3 rounded bg-gray-200'>
-            <label className='block text-gray-700 text-sm font-bold mb-2 ml-3' htmlFor='content'>
+            <label className='block text-gray-700 text-sm font-bold mb-2 ml-3' htmlFor='post-content'>
               Content
             </label>
             <input
-              id='content'
+              id='post-content'
               type='text'
               className='auth-card__input'
               value={state.content}
@@ -171,6 +171,7 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
             Cancel
           </button>
           <button
+            id='modal-action'
             type='button'
             className='px-3 py-1 rounded text-white bg-purple-600 hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed'
             onClick={modalAction === 'Create' ? handlePostCreate : handlePostEdit}

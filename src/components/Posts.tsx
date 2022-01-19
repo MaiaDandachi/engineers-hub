@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { Post } from './Post';
-import PostModal from './PostModal';
+import PostModal from './PostModal/PostModal';
 import CommentModal from './CommentModal';
 
 interface IPosts {

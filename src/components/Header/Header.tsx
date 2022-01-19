@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 import { MenuIcon } from '@heroicons/react/outline';
-import { useAppDispatch } from '../redux-features/hooks';
-import { logout } from '../redux-features/users';
+import { useAppDispatch } from '../../redux-features/hooks';
+import { logout } from '../../redux-features/users';
 
 interface IHeaderProps {
   loggedInUserName: string | undefined;
@@ -36,10 +36,12 @@ export const Header: React.FC<IHeaderProps> = ({ loggedInUserName }) => {
       </div>
       <ul className={`flex justify-end  text-gray-700 flex-grow md:flex ${expanded ? 'block' : 'hidden'} `}>
         <li>
-          <span className='text-purple-600 font-medium text-lg'>{loggedInUserName}</span>
+          <span id='logged-in-userName' className='text-purple-600 font-medium text-lg'>
+            {loggedInUserName}
+          </span>
         </li>
         <li>
-          <button type='button' onClick={handleLogout}>
+          <button id='logout-button' type='button' onClick={handleLogout}>
             <span className='ml-4 hover:text-purple-700 text-lg'>Logout</span>
           </button>
         </li>
