@@ -129,7 +129,6 @@ export const Post: React.FC<IPost> = ({
           </div>
         </div>
       </div>
-      <ToastContainer />
     </>
   );
 };
