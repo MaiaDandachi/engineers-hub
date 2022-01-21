@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import { ToastContainer, toast } from 'react-toastify';
 
-import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
-import { createPost, editPost } from '../../redux-features/posts';
-import { ResizableTextArea } from '../common/ResizableTextArea';
+import { useAppDispatch, useAppSelector } from '../../../redux-features/hooks';
+import { createPost, editPost } from '../../../redux-features/posts';
+import { ResizableTextArea } from '../../common/ResizableTextArea';
 
 interface IPostModalProps {
   // eslint-disable-next-line react/require-default-props

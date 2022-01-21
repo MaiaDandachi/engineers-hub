@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import { PencilAltIcon, TrashIcon, AnnotationIcon, HeartIcon } from '@heroicons/react/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/solid';
-import { useAppDispatch, useAppSelector } from '../redux-features/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
 
-import { deletePost } from '../redux-features/posts';
+import { deletePost } from '../../redux-features/posts';
 
 interface IPost {
   id: string;
