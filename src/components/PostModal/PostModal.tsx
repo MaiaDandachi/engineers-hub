@@ -4,6 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 
 import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
 import { createPost, editPost } from '../../redux-features/posts';
+import { ResizableTextArea } from '../common/ResizableTextArea';
 
 interface IPostModalProps {
   // eslint-disable-next-line react/require-default-props
@@ -13,16 +14,10 @@ interface IPostModalProps {
   onClose: () => void;
 }
 
-interface IState {
-  title: string;
-  content: string;
-}
-
 const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAction, onClose }) => {
-  const [state, setState] = useState<IState>({
-    title: '',
-    content: '',
-  });
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((reduxState) => reduxState.users.userInfo);
 
@@ -33,8 +28,8 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
         createPost({
           id: uuidV4(),
           postUserInfo: { id: id || '', userName: userName || '' },
-          title: state.title,
-          content: state.content,
+          title,
+          content,
         })
       );
 
@@ -74,8 +69,8 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
     const resultAction = await dispatch(
       editPost({
         postUserInfo: { id: id || '', userName: userName || '' },
-        title: state.title,
-        content: state.content,
+        title,
+        content,
         id: postId || '',
       })
     );
@@ -108,11 +103,6 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
     } else {
       onClose();
     }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, stateName: string) => {
-    const newInputValue = e.target.value;
-    setState((currState) => ({ ...currState, [stateName]: newInputValue }));
   };
 
   return (
@@ -149,21 +139,15 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
               id='post-title'
               type='text'
               className='auth-card__input'
-              value={state.title}
-              onChange={(e) => handleInputChange(e, 'title')}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
             />
           </div>
           <div className='mb-3 pt-3 rounded bg-gray-200'>
             <label className='block text-gray-700 text-sm font-bold mb-2 ml-3' htmlFor='post-content'>
               Content
             </label>
-            <input
-              id='post-content'
-              type='text'
-              className='auth-card__input'
-              value={state.content}
-              onChange={(e) => handleInputChange(e, 'content')}
-            />
+            <ResizableTextArea id='post-content' value={content} onChange={(e) => setContent(e.target.value)} />
           </div>
         </div>
         <div id='modal-footer' className='flex justify-end'>
@@ -175,7 +159,7 @@ const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAc
             type='button'
             className='px-3 py-1 rounded text-white bg-purple-600 hover:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed'
             onClick={modalAction === 'Create' ? handlePostCreate : handlePostEdit}
-            disabled={!state.title || !state.content}
+            disabled={!title || !content}
           >
             {modalAction}
           </button>
