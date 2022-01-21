@@ -44,7 +44,9 @@ export const Posts: React.FC<IPosts> = ({ posts }) => {
           postUserInfo={item.postUserInfo}
           commentsCount={item.commentsCount ? item.commentsCount : 0}
           openEditPostModal={(id: string) => openPostEditModal(id)}
-          openCommentModal={(id: string, postTitle: string) => openCommentModal(id, postTitle)}
+          openCommentModal={(id: string, postTitle: string) => {
+            openCommentModal(id, postTitle);
+          }}
         />
       ))}
 
@@ -53,12 +55,22 @@ export const Posts: React.FC<IPosts> = ({ posts }) => {
           postId={clickedPostId}
           modalTitle='Edit Post'
           modalAction='Edit'
-          onClose={() => setIsEditPostModalOpen(false)}
+          onClose={() => {
+            setIsEditPostModalOpen(false);
+            setClickedPostId('');
+          }}
         />
       )}
 
-      {isCommentModalOpen && (
-        <CommentModal postId={clickedPostId} title={clickedPostTitle} onClose={() => setIsCommentModalOpen(false)} />
+      {isCommentModalOpen && clickedPostId && (
+        <CommentModal
+          postId={clickedPostId}
+          title={clickedPostTitle}
+          onClose={() => {
+            setIsCommentModalOpen(false);
+            setClickedPostId('');
+          }}
+        />
       )}
     </>
   );

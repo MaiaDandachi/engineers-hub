@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { ResizableTextArea } from '../common/ResizableTextArea';
 
-export const CommentForm: React.FC = () => {
+interface ICommentFormProps {
+  onCommentAdd: (comment: string) => void;
+}
+
+export const CommentForm: React.FC<ICommentFormProps> = ({ onCommentAdd }) => {
   const [comment, setComment] = useState('');
 
   return (
@@ -16,6 +20,7 @@ export const CommentForm: React.FC = () => {
         <button
           type='button'
           className='block mx-auto w-2/6 mb-1 px-3 py-1 rounded text-white bg-purple-600 hover:bg-purple-800'
+          onClick={() => onCommentAdd(comment)}
         >
           Add
         </button>
