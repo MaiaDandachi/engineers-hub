@@ -6,6 +6,7 @@ import { CommentForm } from './CommentForm';
 import { Comments } from './Comments';
 
 import { createComment } from '../../redux-features/comments';
+import { getPosts } from '../../redux-features/posts';
 import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
 
 interface ICommentModalProps {
@@ -43,6 +44,7 @@ export const CommentModal: React.FC<ICommentModalProps> = ({ postId, title, onCl
         }
       );
 
+      await dispatch(getPosts());
       onClose();
     }
 
@@ -107,7 +109,9 @@ export const CommentModal: React.FC<ICommentModalProps> = ({ postId, title, onCl
           </div>
 
           <CommentForm onCommentAdd={(comment) => handleCommentAdd(comment)} />
-          <Comments postId={postId} />
+          <div className='max-h-64 overflow-y-auto overflow-x-hidden'>
+            <Comments postId={postId} />
+          </div>
         </div>
       </div>
     </>

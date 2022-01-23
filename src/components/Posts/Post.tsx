@@ -10,12 +10,12 @@ interface IPost {
   id: string;
   title: string;
   content: string;
-  // eslint-disable-next-line react/require-default-props
-  commentsCount?: number;
   postUserInfo: {
     id: string;
     userName: string;
   };
+  commentsCount: number;
+  likesCount: number;
   openEditPostModal: (id: string, postTitle: string, postContent: string) => void;
   openCommentModal: (id: string, postTitle: string) => void;
 }
@@ -26,6 +26,7 @@ export const Post: React.FC<IPost> = ({
   id,
   postUserInfo,
   commentsCount,
+  likesCount,
   openEditPostModal,
   openCommentModal,
 }) => {
@@ -101,7 +102,7 @@ export const Post: React.FC<IPost> = ({
                   <HeartIcon className='w-5 h-5 left-5 bottom-4 ' />
                 )}
               </button>
-              <span className='pl-1'>3 likes</span>
+              <span className='pl-1'>{likesCount} likes</span>
             </div>
 
             <div className='flex pl-2'>
@@ -111,7 +112,7 @@ export const Post: React.FC<IPost> = ({
                   onClick={() => openCommentModal(id, title)}
                 />
               </button>
-              <span className='pl-1'>{commentsCount || 0} comments</span>
+              <span className='pl-1'>{commentsCount} comments</span>
             </div>
 
             {userInfo.id === postUserInfo.id && (

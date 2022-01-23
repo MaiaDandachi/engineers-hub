@@ -12,7 +12,8 @@ interface Post {
   title: string;
   content: string;
   postUserInfo: User;
-  commentsCount?: number;
+  commentsCount: number;
+  likesCount: number;
 }
 
 interface PostsState {
@@ -57,7 +58,7 @@ export const createPost = createAsyncThunk<
   // Return type of the payload creator
   Post,
   // postData object type
-  Post,
+  Partial<Post>,
   {
     // Optional fields for defining thunkApi field types
     rejectValue: ValidationErrors;
@@ -80,6 +81,8 @@ export const createPost = createAsyncThunk<
         title,
         content,
         postUserInfo,
+        commentsCount: 0,
+        likesCount: 0,
       },
       config
     );

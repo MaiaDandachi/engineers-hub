@@ -9,11 +9,12 @@ interface IPosts {
     id: string;
     title: string;
     content: string;
-    commentsCount?: number;
     postUserInfo: {
       id: string;
       userName: string;
     };
+    commentsCount: number;
+    likesCount: number;
   }>;
 }
 export const Posts: React.FC<IPosts> = ({ posts }) => {
@@ -45,7 +46,8 @@ export const Posts: React.FC<IPosts> = ({ posts }) => {
           title={item.title}
           content={item.content}
           postUserInfo={item.postUserInfo}
-          commentsCount={item.commentsCount ? item.commentsCount : 0}
+          commentsCount={item.commentsCount}
+          likesCount={item.likesCount}
           openEditPostModal={(id: string, postTitle: string, postContent: string) => {
             openPostEditModal(id, postTitle, postContent);
           }}
