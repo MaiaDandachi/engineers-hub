@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { PencilAltIcon, TrashIcon, AnnotationIcon, HeartIcon } from '@heroicons/react/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/solid';
 import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
 
-import { deletePost } from '../../redux-features/posts';
+import { deletePost, likePost, unlikePost } from '../../redux-features/posts';
 
 interface IPost {
   id: string;
@@ -33,9 +33,16 @@ export const Post: React.FC<IPost> = ({
   const { userInfo } = useAppSelector((state) => state.users);
   const dispatch = useAppDispatch();
 
+  const [numberOfLikes, setNumberOfLikes] = useState(likesCount);
   const [isPostLiked, setIsPostLiked] = useState(false);
 
-  const handlePostLike = () => {
+  const handlePostLike = async () => {
+    if (!isPostLiked) {
+      await dispatch(likePost({ postId: id }));
+    } else {
+      await dispatch(unlikePost({ postId: id }));
+    }
+    setNumberOfLikes(isPostLiked ? numberOfLikes - 1 : numberOfLikes + 1);
     setIsPostLiked(!isPostLiked);
   };
 
@@ -102,7 +109,7 @@ export const Post: React.FC<IPost> = ({
                   <HeartIcon className='w-5 h-5 left-5 bottom-4 ' />
                 )}
               </button>
-              <span className='pl-1'>{likesCount} likes</span>
+              <span className='pl-1'>{numberOfLikes} likes</span>
             </div>
 
             <div className='flex pl-2'>

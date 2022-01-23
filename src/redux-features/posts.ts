@@ -163,6 +163,52 @@ export const deletePost = createAsyncThunk<
   }
 });
 
+export const likePost = createAsyncThunk<
+  // Return type of the payload creator
+  Post,
+  { postId: string },
+  {
+    // Optional fields for defining thunkApi field types
+    rejectValue: ValidationErrors;
+  }
+>('posts/likePost', async ({ postId }, { rejectWithValue }) => {
+  try {
+    const response = await axios.get<{ post: Post }>(`/api/posts/${postId}/like`);
+
+    return response.data.post;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    const error: AxiosError<ValidationErrors> = err;
+    if (!error.response) {
+      throw err;
+    }
+    return rejectWithValue(error.response.data);
+  }
+});
+
+export const unlikePost = createAsyncThunk<
+  Post,
+  // action function parameter object type
+  { postId: string },
+  {
+    // Optional fields for defining thunkApi field types
+    rejectValue: ValidationErrors;
+  }
+>('posts/unlikePost', async ({ postId }, { rejectWithValue }) => {
+  try {
+    const response = await axios.get<{ post: Post }>(`/api/posts/${postId}/unlike`);
+
+    return response.data.post;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    const error: AxiosError<ValidationErrors> = err;
+    if (!error.response) {
+      throw err;
+    }
+    return rejectWithValue(error.response.data);
+  }
+});
+
 const postsSlice = createSlice({
   name: 'posts',
   initialState,
@@ -235,6 +281,26 @@ const postsSlice = createSlice({
       } else {
         state.error = action.error.message;
       }
+    });
+
+    builder.addCase(likePost.fulfilled, (state, { payload }) => {
+      const { id } = payload;
+      state.posts = state.posts.map((post) => {
+        if (post.id === id) {
+          return { ...payload, likesCount: post.likesCount + 1 };
+        }
+        return post;
+      });
+    });
+
+    builder.addCase(unlikePost.fulfilled, (state, { payload }) => {
+      const { id } = payload;
+      state.posts = state.posts.map((post) => {
+        if (post.id === id) {
+          return { ...payload, likesCount: post.likesCount - 1 };
+        }
+        return post;
+      });
     });
   },
 });

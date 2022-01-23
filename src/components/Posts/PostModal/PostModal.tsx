@@ -42,6 +42,20 @@ const PostModal: React.FC<IPostModalProps> = ({
         })
       );
 
+      if (createPost.fulfilled.match(resultAction)) {
+        toast.success(
+          <div>
+            Success
+            <br />
+            Post created
+          </div>,
+          {
+            position: toast.POSITION.BOTTOM_RIGHT,
+          }
+        );
+        onClose();
+      }
+
       if (createPost.rejected.match(resultAction)) {
         if (resultAction.payload) {
           toast.error(
@@ -67,8 +81,6 @@ const PostModal: React.FC<IPostModalProps> = ({
             }
           );
         }
-      } else {
-        onClose();
       }
     }
   };

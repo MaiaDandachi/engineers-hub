@@ -94,6 +94,8 @@ app.post('/api/posts', (req, res) => {
     postUserInfo,
     title,
     content,
+    commentsCount: 0,
+    likesCount: 0,
   };
 
   const isNewPostAlreadyWritten = posts.some(
@@ -218,7 +220,7 @@ app.post('/api/posts/:postId/comments', (req, res) => {
 
   const updatedPost = {
     ...posts[commentedOnPostId],
-    commentsCount: posts[commentedOnPostId].commentsCount ? posts[commentedOnPostId].commentsCount + 1 : 1,
+    commentsCount: posts[commentedOnPostId].commentsCount + 1,
   };
 
   posts[commentedOnPostId] = updatedPost;
@@ -235,6 +237,39 @@ app.delete('/api/posts/:postId/comments/:id', (req, res) => {
 
   fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(filteredComments));
   res.json({ message: 'Comment removed', commentId: req.params.id });
+});
+
+// ----------------------------------------------
+app.get('/api/posts/:id/like', (req, res) => {
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+
+  const likedPostId = posts.findIndex((post) => post.id === req.params.id);
+
+  const updatedPost = {
+    ...posts[likedPostId],
+    likesCount: posts[likedPostId].likesCount + 1,
+  };
+
+  posts[likedPostId] = updatedPost;
+  fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+
+  res.status(201).json({ post: posts[likedPostId] });
+});
+
+app.get('/api/posts/:id/unlike', (req, res) => {
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+
+  const unlikedPostId = posts.findIndex((post) => post.id === req.params.id);
+
+  const updatedPost = {
+    ...posts[unlikedPostId],
+    likesCount: posts[unlikedPostId].likesCount - 1,
+  };
+
+  posts[unlikedPostId] = updatedPost;
+  fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+
+  res.status(201).json({ post: posts[unlikedPostId] });
 });
 
 // ----------------------------------------------
