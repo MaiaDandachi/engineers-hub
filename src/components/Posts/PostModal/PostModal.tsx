@@ -1,3 +1,4 @@
+/* eslint-disable react/require-default-props */
 import React, { useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import { ToastContainer, toast } from 'react-toastify';
@@ -7,16 +8,24 @@ import { createPost, editPost } from '../../../redux-features/posts';
 import { ResizableTextArea } from '../../common/ResizableTextArea';
 
 interface IPostModalProps {
-  // eslint-disable-next-line react/require-default-props
   postId?: string;
   modalTitle: string;
   modalAction: string;
+  postTitle?: string;
+  postContent?: string;
   onClose: () => void;
 }
 
-const PostModal: React.FC<IPostModalProps> = ({ postId = '', modalTitle, modalAction, onClose }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+const PostModal: React.FC<IPostModalProps> = ({
+  postId = '',
+  modalTitle,
+  modalAction,
+  postTitle = '',
+  postContent = '',
+  onClose,
+}) => {
+  const [title, setTitle] = useState(postTitle);
+  const [content, setContent] = useState(postContent);
 
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((reduxState) => reduxState.users.userInfo);

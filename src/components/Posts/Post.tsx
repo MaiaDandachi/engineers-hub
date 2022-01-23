@@ -16,7 +16,7 @@ interface IPost {
     id: string;
     userName: string;
   };
-  openEditPostModal: (id: string) => void;
+  openEditPostModal: (id: string, postTitle: string, postContent: string) => void;
   openCommentModal: (id: string, postTitle: string) => void;
 }
 
@@ -122,7 +122,7 @@ export const Post: React.FC<IPost> = ({
                 />
                 <PencilAltIcon
                   className='w-5 h-5 right-10 bottom-4 absolute hover:text-purple-600'
-                  onClick={() => openEditPostModal(id)}
+                  onClick={() => openEditPostModal(id, title, content)}
                 />
               </>
             )}
