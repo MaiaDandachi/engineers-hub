@@ -9,6 +9,7 @@ app.use(express.json());
 const DATA_FILE = path.join(__dirname, 'data/users.json');
 const POSTS_DATA_FILE = path.join(__dirname, 'data/posts.json');
 const COMMENTS_DATA_FILE = path.join(__dirname, 'data/comments.json');
+const LIKES_DATA_FILE = path.join(__dirname, 'data/likes.json');
 
 app.get('/', (req, res) => {
   res.send('API IS RUNNING...');
@@ -240,26 +241,57 @@ app.delete('/api/posts/:postId/comments/:id', (req, res) => {
 });
 
 // ----------------------------------------------
-app.get('/api/posts/:id/like', (req, res) => {
+app.post('/api/posts/:postId/like', (req, res) => {
   const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE));
 
-  const likedPostId = posts.findIndex((post) => post.id === req.params.id);
+  const { userId } = req.body;
+  const isPostLikedByUser = likes.some((likeObj) => likeObj.userId === userId && likeObj.postId === req.params.postId);
 
-  const updatedPost = {
-    ...posts[likedPostId],
-    likesCount: posts[likedPostId].likesCount + 1,
-  };
+  if (!isPostLikedByUser) {
+    // if the user didn't like the post, add userId & postId to likes and increment likesCount inside that post
+    likes.push({
+      userId,
+      postId: req.params.postId,
+    });
 
-  posts[likedPostId] = updatedPost;
-  fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+    fs.writeFileSync(LIKES_DATA_FILE, JSON.stringify(likes));
 
-  res.status(201).json({ post: posts[likedPostId] });
+    const likedPostId = posts.findIndex((post) => post.id === req.params.postId);
+
+    const updatedPost = {
+      ...posts[likedPostId],
+      likesCount: posts[likedPostId].likesCount + 1,
+    };
+
+    posts[likedPostId] = updatedPost;
+    fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+
+    return res.status(201).json({ post: posts[likedPostId] });
+  }
+
+  return res.status(400).json({ error: 'Post already liked' });
 });
 
-app.get('/api/posts/:id/unlike', (req, res) => {
+app.post('/api/posts/:postId/unlike', (req, res) => {
   const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE));
 
-  const unlikedPostId = posts.findIndex((post) => post.id === req.params.id);
+  const { userId } = req.body;
+  const isPostLikedByUser = likes.some((likeObj) => likeObj.userId === userId && likeObj.postId === req.params.postId);
+
+  if (!isPostLikedByUser) {
+    return res.status(400).json({ error: 'Post is not liked' });
+  }
+  // if the like exists remove the like from LIKES_DATA_FILE
+  const filteredLikesObjs = likes.filter(
+    (likeObj) => likeObj.postId !== req.params.postId && likeObj.userId !== req.body.userId
+  );
+
+  fs.writeFileSync(LIKES_DATA_FILE, JSON.stringify(filteredLikesObjs));
+
+  // decrement likesCount inside that post
+  const unlikedPostId = posts.findIndex((post) => post.id === req.params.postId);
 
   const updatedPost = {
     ...posts[unlikedPostId],
@@ -269,7 +301,7 @@ app.get('/api/posts/:id/unlike', (req, res) => {
   posts[unlikedPostId] = updatedPost;
   fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
 
-  res.status(201).json({ post: posts[unlikedPostId] });
+  return res.status(201).json({ post: posts[unlikedPostId] });
 });
 
 // ----------------------------------------------
