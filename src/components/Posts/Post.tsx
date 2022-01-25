@@ -18,6 +18,7 @@ interface IPost {
   likesCount: number;
   openEditPostModal: (id: string, postTitle: string, postContent: string) => void;
   openCommentModal: (id: string, postTitle: string) => void;
+  isPostLikedByUser: () => boolean;
 }
 
 export const Post: React.FC<IPost> = ({
@@ -29,22 +30,14 @@ export const Post: React.FC<IPost> = ({
   likesCount,
   openEditPostModal,
   openCommentModal,
+  isPostLikedByUser,
 }) => {
+  const isPostLikedByCurrentUser = isPostLikedByUser();
   const { userInfo } = useAppSelector((state) => state.users);
   const dispatch = useAppDispatch();
 
   const [numberOfLikes, setNumberOfLikes] = useState(likesCount);
-  const [isPostLiked, setIsPostLiked] = useState(false);
-
-  const handlePostLike = async () => {
-    if (!isPostLiked) {
-      await dispatch(likePost({ postId: id }));
-    } else {
-      await dispatch(unlikePost({ postId: id }));
-    }
-    setNumberOfLikes(isPostLiked ? numberOfLikes - 1 : numberOfLikes + 1);
-    setIsPostLiked(!isPostLiked);
-  };
+  const [isPostLiked, setIsPostLiked] = useState(isPostLikedByCurrentUser);
 
   const handlePostDelete = async () => {
     const resultAction = await dispatch(deletePost(id));
@@ -90,6 +83,16 @@ export const Post: React.FC<IPost> = ({
     }
   };
 
+  const handlePostLikeUnlike = async () => {
+    if (!isPostLiked) {
+      await dispatch(likePost({ postId: id, userId: userInfo.id || '' }));
+    } else {
+      await dispatch(unlikePost({ postId: id, userId: userInfo.id || '' }));
+    }
+    setNumberOfLikes(isPostLiked ? numberOfLikes - 1 : numberOfLikes + 1);
+    setIsPostLiked(!isPostLiked);
+  };
+
   return (
     <>
       <div className='post-card'>
@@ -102,7 +105,7 @@ export const Post: React.FC<IPost> = ({
 
           <div className='text-sm px-5 pt-1 pb-5 flex'>
             <div className='flex'>
-              <button type='button' className='hover:text-purple-600' onClick={handlePostLike}>
+              <button type='button' className='hover:text-purple-600' onClick={handlePostLikeUnlike}>
                 {isPostLiked ? (
                   <HeartIconSolid className='w-5 h-5 left-5 bottom-4 text-purple-700' />
                 ) : (

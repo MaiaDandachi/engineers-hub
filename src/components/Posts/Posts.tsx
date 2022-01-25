@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+
+import { getUserLikedPosts } from '../../redux-features/users';
+import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
 
 import { Post } from './Post';
 import PostModal from './PostModal/PostModal';
@@ -18,11 +21,32 @@ interface IPosts {
   }>;
 }
 export const Posts: React.FC<IPosts> = ({ posts }) => {
+  const dispatch = useAppDispatch();
+  const userInfo = useAppSelector((state) => state.users.userInfo);
+
   const [isEditPostModalOpen, setIsEditPostModalOpen] = useState(false);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+
   const [clickedPostId, setClickedPostId] = useState('');
   const [clickedPostTitle, setClickedPostTitle] = useState('');
   const [clickedPostContent, setClickedPostContent] = useState('');
+
+  const isPostLikedByUser = (postId: string) => {
+    if (userInfo.likedPosts) {
+      return userInfo.likedPosts.some((id) => id === postId);
+    }
+    return false;
+  };
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const fetchUserLikedPosts = useRef(() => {});
+
+  fetchUserLikedPosts.current = async () => {
+    await dispatch(getUserLikedPosts(userInfo.id || ''));
+  };
+
+  useEffect(() => {
+    fetchUserLikedPosts.current();
+  }, []);
 
   const openPostEditModal = (postId: string, postTitle: string, postContent: string) => {
     setClickedPostId(postId);
@@ -54,6 +78,7 @@ export const Posts: React.FC<IPosts> = ({ posts }) => {
           openCommentModal={(id: string, postTitle: string) => {
             openCommentModal(id, postTitle);
           }}
+          isPostLikedByUser={() => isPostLikedByUser(item.id)}
         />
       ))}
 

@@ -166,14 +166,19 @@ export const deletePost = createAsyncThunk<
 export const likePost = createAsyncThunk<
   // Return type of the payload creator
   Post,
-  { postId: string },
+  { postId: string; userId: string },
   {
     // Optional fields for defining thunkApi field types
     rejectValue: ValidationErrors;
   }
->('posts/likePost', async ({ postId }, { rejectWithValue }) => {
+>('posts/likePost', async ({ postId, userId }, { rejectWithValue }) => {
   try {
-    const response = await axios.get<{ post: Post }>(`/api/posts/${postId}/like`);
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const response = await axios.post<{ post: Post }>(`/api/posts/${postId}/like`, { userId }, config);
 
     return response.data.post;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -189,14 +194,19 @@ export const likePost = createAsyncThunk<
 export const unlikePost = createAsyncThunk<
   Post,
   // action function parameter object type
-  { postId: string },
+  { postId: string; userId: string },
   {
     // Optional fields for defining thunkApi field types
     rejectValue: ValidationErrors;
   }
->('posts/unlikePost', async ({ postId }, { rejectWithValue }) => {
+>('posts/unlikePost', async ({ postId, userId }, { rejectWithValue }) => {
   try {
-    const response = await axios.get<{ post: Post }>(`/api/posts/${postId}/unlike`);
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const response = await axios.post<{ post: Post }>(`/api/posts/${postId}/unlike`, { userId }, config);
 
     return response.data.post;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -293,6 +303,16 @@ const postsSlice = createSlice({
       });
     });
 
+    builder.addCase(likePost.rejected, (state, action) => {
+      if (action.payload) {
+        // Being that we passed in ValidationErrors to rejectType
+        // in `createAsyncThunk`, the payload will be available here.
+        state.error = action.payload.errorMessage;
+      } else {
+        state.error = action.error.message;
+      }
+    });
+
     builder.addCase(unlikePost.fulfilled, (state, { payload }) => {
       const { id } = payload;
       state.posts = state.posts.map((post) => {
@@ -301,6 +321,16 @@ const postsSlice = createSlice({
         }
         return post;
       });
+    });
+
+    builder.addCase(unlikePost.rejected, (state, action) => {
+      if (action.payload) {
+        // Being that we passed in ValidationErrors to rejectType
+        // in `createAsyncThunk`, the payload will be available here.
+        state.error = action.payload.errorMessage;
+      } else {
+        state.error = action.error.message;
+      }
     });
   },
 });
