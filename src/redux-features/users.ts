@@ -7,6 +7,7 @@ export interface User {
   userName: string;
   email: string;
   password: string;
+  likedPosts?: Array<string>;
 }
 
 interface ValidationErrors {
@@ -93,6 +94,29 @@ export const loginUser = createAsyncThunk<
   }
 });
 
+export const getUserLikedPosts = createAsyncThunk<
+  // Return type of the payload creator
+  Array<string>,
+  string,
+  {
+    // Optional fields for defining thunkApi field types
+    rejectValue: ValidationErrors;
+  }
+>('users/likedPosts', async (userId, { rejectWithValue }) => {
+  try {
+    const response = await axios.get<{ userLikedPosts: Array<string> }>(`/api/users/${userId}/likedPosts`);
+
+    return response.data.userLikedPosts;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    const error: AxiosError<ValidationErrors> = err;
+    if (!error.response) {
+      throw err;
+    }
+    return rejectWithValue(error.response.data);
+  }
+});
+
 const initialState: UsersState = {
   userInfo: {},
   error: null,
@@ -126,6 +150,19 @@ const usersSlice = createSlice({
       state.userInfo = payload;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
+      if (action.payload) {
+        // Being that we passed in ValidationErrors to rejectType
+        // in `createAsyncThunk`, the payload will be available here.
+        state.error = action.payload.errorMessage;
+      } else {
+        state.error = action.error.message;
+      }
+    });
+
+    builder.addCase(getUserLikedPosts.fulfilled, (state, { payload }) => {
+      state.userInfo = { ...state.userInfo, likedPosts: payload };
+    });
+    builder.addCase(getUserLikedPosts.rejected, (state, action) => {
       if (action.payload) {
         // Being that we passed in ValidationErrors to rejectType
         // in `createAsyncThunk`, the payload will be available here.

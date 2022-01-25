@@ -270,7 +270,8 @@ app.post('/api/posts/:postId/like', (req, res) => {
     return res.status(201).json({ post: posts[likedPostId] });
   }
 
-  return res.status(400).json({ error: 'Post already liked' });
+  res.status(401);
+  throw new Error('Post is already liked');
 });
 
 app.post('/api/posts/:postId/unlike', (req, res) => {
@@ -281,7 +282,7 @@ app.post('/api/posts/:postId/unlike', (req, res) => {
   const isPostLikedByUser = likes.some((likeObj) => likeObj.userId === userId && likeObj.postId === req.params.postId);
 
   if (!isPostLikedByUser) {
-    return res.status(400).json({ error: 'Post is not liked' });
+    return res.status(400).json({ errorMessage: 'Post is not liked' });
   }
   // if the like exists remove the like from LIKES_DATA_FILE
   const filteredLikesObjs = likes.filter(
@@ -302,6 +303,17 @@ app.post('/api/posts/:postId/unlike', (req, res) => {
   fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
 
   return res.status(201).json({ post: posts[unlikedPostId] });
+});
+
+app.get('/api/users/:userId/likedPosts', (req, res) => {
+  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE));
+
+  const filteredLikes = likes.filter((likeObj) => likeObj.userId === req.params.userId);
+
+  const userLikedPostsIds = filteredLikes.map((likeObj) => likeObj.postId);
+  return res.json({
+    userLikedPosts: userLikedPostsIds,
+  });
 });
 
 // ----------------------------------------------
