@@ -52,29 +52,39 @@ app.post('/api/users/register', async (req, res) => {
   }
 });
 
-app.post('/api/users/login', async (req, res) => {
+app.post('/api/users/login', (req, res, next) => {
+  const { email, password } = req.body;
   const users = JSON.parse(fs.readFileSync(DATA_FILE));
-  try {
-    const requestedUser = {
-      email: req.body.email,
-      password: req.body.password,
-    };
 
-    const loggedUser = users.find((user) => user.email === requestedUser.email);
+  const registeredUser = users.find((user) => user.email === email);
 
-    const doesPasswordsMatch = await bcrypt.compare(requestedUser.password, loggedUser.password);
+  if (registeredUser) {
+    bcrypt
+      .compare(password, registeredUser.password)
+      .then((isMatch) => {
+        let isPasswordInvalid = false;
 
-    if (loggedUser && doesPasswordsMatch) {
-      const userResponse = { ...loggedUser };
-      delete userResponse.password;
+        if (isMatch) {
+          delete registeredUser.password;
+          res.json({ user: registeredUser });
+        } else {
+          isPasswordInvalid = true;
+        }
 
-      res.status(201).json({ user: userResponse });
-    } else {
-      res.status(401);
-      throw new Error('Invalid email or password');
-    }
-  } catch (err) {
-    throw new Error('Could not hash the user password');
+        // if the compare between the 2 passwords was not match
+        if (isPasswordInvalid) {
+          res.status(401);
+          throw new Error('Invalid password');
+        }
+      })
+      .catch((err) => {
+        // let the custom error middleware handle it.
+        next(err);
+      });
+  } else {
+    // if the user is not registered with the given email.
+    res.status(401);
+    throw new Error('Invalid email');
   }
 });
 //-------------------------------------------------------
