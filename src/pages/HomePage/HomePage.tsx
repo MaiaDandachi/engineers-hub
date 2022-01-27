@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
+import { io } from 'socket.io-client';
 
 import { useAppSelector, useAppDispatch } from '../../redux-features/hooks';
 
@@ -18,6 +19,7 @@ export const HomePage: React.FC = () => {
   const posts = useAppSelector((state) => state.posts.posts);
   const isLoading = useAppSelector((state) => state.posts.isLoading);
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+  const [socket, setSocket] = useState<any>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const fetchPosts = useRef(() => {});
@@ -61,6 +63,10 @@ export const HomePage: React.FC = () => {
 
   useEffect(() => {
     fetchPosts.current();
+  }, []);
+
+  useEffect(() => {
+    setSocket(io('http://localhost:5000'));
   }, []);
 
   return (
