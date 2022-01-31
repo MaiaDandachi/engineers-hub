@@ -10,6 +10,8 @@ import { Posts } from '../../components/Posts/Posts';
 import PostModal from '../../components/Posts/PostModal/PostModal';
 import Loader from '../../components/Loader';
 import { getPosts } from '../../redux-features/posts';
+import { setSocket } from '../../redux-features/globals';
+import SocketClient from '../../SocketClient';
 
 export const HomePage: React.FC = () => {
   const history = useHistory();
@@ -19,7 +21,7 @@ export const HomePage: React.FC = () => {
   const posts = useAppSelector((state) => state.posts.posts);
   const isLoading = useAppSelector((state) => state.posts.isLoading);
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
-  const [socket, setSocket] = useState<any>(null);
+  // const [currentSocket, setCurrentSocket] = useState<any>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   const fetchPosts = useRef(() => {});
@@ -55,6 +57,13 @@ export const HomePage: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  // const initSocket = useRef(() => {});
+  // initSocket.current = () => {
+  //   const socket = io('http://localhost:5000');
+  //   dispatch(setSocket(socket));
+  // };
+
   useEffect(() => {
     if (userInfo && Object.keys(userInfo).length === 0) {
       history.push('/register');
@@ -66,11 +75,16 @@ export const HomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setSocket(io('http://localhost:5000'));
-  }, []);
+    const socket = io('http://localhost:5000');
+    dispatch(setSocket(socket));
+    return () => {
+      socket.close();
+    };
+  }, [dispatch]);
 
   return (
     <>
+      <SocketClient />
       <Header loggedInUserName={userInfo?.userName} />
       <ToastContainer />
       <div className='bg-red-0 flex justify-end'>

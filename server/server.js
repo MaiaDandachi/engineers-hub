@@ -4,6 +4,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const SocketServer = require('./socketServer.js');
 
 const app = express();
 const httpServer = createServer(app);
@@ -16,10 +17,7 @@ const io = new Server(httpServer, {
 });
 
 io.on('connection', (socket) => {
-  console.log('Someone has connected');
-  socket.on('sendNotification', ({ senderId }) => {
-    console.log(senderId);
-  });
+  SocketServer(socket);
 });
 
 const DATA_FILE = path.join(__dirname, 'data/users.json');
