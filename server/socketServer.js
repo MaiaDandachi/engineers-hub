@@ -17,6 +17,15 @@ const SocketServer = (socket) => {
     console.log('Users', users);
   });
 
+  socket.on('sendNotification', ({ senderId, receiverId, type }) => {
+    const receiver = getUser(receiverId);
+    console.log(`Got an notfictaion. ${senderId} liked ${receiverId} post `);
+    socket.to(receiver.socketId).emit('getNotification', {
+      senderId,
+      type,
+    });
+  });
+
   socket.on('disconnect', () => {
     removeUser(socket.id);
 

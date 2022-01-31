@@ -34,6 +34,7 @@ export const Post: React.FC<IPost> = ({
 }) => {
   const isPostLikedByCurrentUser = isPostLikedByUser();
   const { userInfo } = useAppSelector((state) => state.users);
+  const socket = useAppSelector((state) => state.globals.socket);
   const dispatch = useAppDispatch();
 
   const [numberOfLikes, setNumberOfLikes] = useState(likesCount);
@@ -86,6 +87,11 @@ export const Post: React.FC<IPost> = ({
   const handlePostLikeUnlike = async () => {
     if (!isPostLiked) {
       await dispatch(likePost({ postId: id, userId: userInfo.id || '' }));
+      socket.emit('sendNotification', {
+        senderId: userInfo.id,
+        receiverId: postUserInfo.id,
+        type: 1,
+      });
     } else {
       await dispatch(unlikePost({ postId: id, userId: userInfo.id || '' }));
     }
