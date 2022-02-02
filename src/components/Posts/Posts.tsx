@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 import { getUserLikedPosts } from '../../redux-features/users';
 import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
@@ -19,8 +21,9 @@ interface IPosts {
     commentsCount: number;
     likesCount: number;
   }>;
+  socket: Socket<DefaultEventsMap> | null;
 }
-export const Posts: React.FC<IPosts> = ({ posts }) => {
+export const Posts: React.FC<IPosts> = ({ posts, socket }) => {
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((state) => state.users.userInfo);
 
@@ -79,6 +82,7 @@ export const Posts: React.FC<IPosts> = ({ posts }) => {
             openCommentModal(id, postTitle);
           }}
           isPostLikedByUser={() => isPostLikedByUser(item.id)}
+          socket={socket}
         />
       ))}
 

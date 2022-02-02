@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { PencilAltIcon, TrashIcon, AnnotationIcon, HeartIcon } from '@heroicons/react/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/solid';
-import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
+import { Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
+import { useAppDispatch, useAppSelector } from '../../redux-features/hooks';
 import { deletePost, likePost, unlikePost } from '../../redux-features/posts';
 
 interface IPost {
@@ -19,6 +21,7 @@ interface IPost {
   openEditPostModal: (id: string, postTitle: string, postContent: string) => void;
   openCommentModal: (id: string, postTitle: string) => void;
   isPostLikedByUser: () => boolean;
+  socket: Socket<DefaultEventsMap> | null;
 }
 
 export const Post: React.FC<IPost> = ({
@@ -31,10 +34,10 @@ export const Post: React.FC<IPost> = ({
   openEditPostModal,
   openCommentModal,
   isPostLikedByUser,
+  socket,
 }) => {
   const isPostLikedByCurrentUser = isPostLikedByUser();
   const { userInfo } = useAppSelector((state) => state.users);
-  const socket = useAppSelector((state) => state.globals.socket);
   const dispatch = useAppDispatch();
 
   const [numberOfLikes, setNumberOfLikes] = useState(likesCount);
@@ -87,7 +90,7 @@ export const Post: React.FC<IPost> = ({
   const handlePostLikeUnlike = async () => {
     if (!isPostLiked) {
       await dispatch(likePost({ postId: id, userId: userInfo.id || '' }));
-      socket.emit('sendNotification', {
+      socket?.emit('sendNotification', {
         senderId: userInfo.id,
         receiverId: postUserInfo.id,
         type: 1,

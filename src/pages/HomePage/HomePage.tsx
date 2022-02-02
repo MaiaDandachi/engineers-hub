@@ -68,16 +68,17 @@ export const HomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    setSocket(io('http://localhost:5000'));
-    // return () => {
-    //   socket.close();
-    // };
-  }, []);
+    const newSocket = io('http://localhost:5000');
+    setSocket(newSocket);
+    return () => {
+      newSocket.close();
+    };
+  }, [dispatch]);
 
   return (
     <>
-      {socket && <SocketClient socket={socket} />}
-      <Header loggedInUserName={userInfo?.userName} />
+      {socket?.id && <SocketClient socket={socket} />}
+      <Header loggedInUserName={userInfo?.userName} socket={socket} />
       <ToastContainer />
       <div className='bg-red-0 flex justify-end'>
         <button
@@ -92,7 +93,7 @@ export const HomePage: React.FC = () => {
         <Loader />
       ) : (
         <div className='w-full flex flex-col items-center'>
-          <Posts posts={posts} />
+          <Posts posts={posts} socket={socket} />
         </div>
       )}
       {isCreatePostModalOpen && (

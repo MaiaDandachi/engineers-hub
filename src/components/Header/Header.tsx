@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 import { MenuIcon } from '@heroicons/react/outline';
 import { useAppDispatch } from '../../redux-features/hooks';
@@ -6,9 +8,10 @@ import { logout } from '../../redux-features/users';
 
 interface IHeaderProps {
   loggedInUserName: string | undefined;
+  socket: Socket<DefaultEventsMap> | null;
 }
 
-export const Header: React.FC<IHeaderProps> = ({ loggedInUserName }) => {
+export const Header: React.FC<IHeaderProps> = ({ loggedInUserName, socket }) => {
   const [expanded, setExpanded] = useState(false);
   const dispatch = useAppDispatch();
 
@@ -16,6 +19,12 @@ export const Header: React.FC<IHeaderProps> = ({ loggedInUserName }) => {
     localStorage.removeItem('userInfo');
     dispatch(logout());
   };
+
+  useEffect(() => {
+    socket?.on('getNotification', (data: { senderId: string; type: number }) => {
+      console.log(`${data.senderId} liked your post`);
+    });
+  }, [socket]);
 
   return (
     <nav
