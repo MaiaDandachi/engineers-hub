@@ -16,6 +16,7 @@ interface IHeaderProps {
 export const Header: React.FC<IHeaderProps> = ({ loggedInUserName, socket }) => {
   const [expanded, setExpanded] = useState(false);
   const [isNotificationsListOpen, setIsNotificationListOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Array<string>>([]);
   const dispatch = useAppDispatch();
 
   const handleLogout = () => {
@@ -24,8 +25,10 @@ export const Header: React.FC<IHeaderProps> = ({ loggedInUserName, socket }) => 
   };
 
   useEffect(() => {
-    socket?.on('getNotification', (data: { senderId: string; type: number }) => {
+    socket?.on('getNotification', (data: { senderId: string; senderMail: string; postTopic: string; type: number }) => {
       console.log(`${data.senderId} liked your post`);
+      const notification = `${data.senderMail} liked your post: ${data.postTopic}`;
+      setNotifications((prev) => [...prev, notification]);
     });
   }, [socket]);
 
@@ -50,6 +53,14 @@ export const Header: React.FC<IHeaderProps> = ({ loggedInUserName, socket }) => 
         <ul className={`flex justify-end  text-gray-700 flex-grow md:flex ${expanded ? 'block' : 'hidden'} `}>
           <li>
             <button type='button' onClick={() => setIsNotificationListOpen(!isNotificationsListOpen)}>
+              {notifications?.length > 0 && (
+                <div
+                  className='absolute bg-red-500 text-white top-2 ml-3 flex justify-center items-center
+              rounded-full p-0.5 text-xs w-4 h-4 '
+                >
+                  {notifications.length}
+                </div>
+              )}
               <BellIcon className='w-6 h-5 mt-1 hover:text-purple-600' />
             </button>
           </li>
@@ -68,7 +79,7 @@ export const Header: React.FC<IHeaderProps> = ({ loggedInUserName, socket }) => 
           <MenuIcon />
         </button>
       </nav>
-      {isNotificationsListOpen && <NotificationsList />}
+      {isNotificationsListOpen && <NotificationsList notifications={notifications} />}
     </>
   );
 };

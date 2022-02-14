@@ -93,6 +93,8 @@ export const Post: React.FC<IPost> = ({
       socket?.emit('sendNotification', {
         senderId: userInfo.id,
         receiverId: postUserInfo.id,
+        senderMail: userInfo.email,
+        postTopic: title,
         type: 1,
       });
     } else {

@@ -17,11 +17,13 @@ const SocketServer = (socket) => {
     console.log('Users', users);
   });
 
-  socket.on('sendNotification', ({ senderId, receiverId, type }) => {
+  socket.on('sendNotification', ({ senderId, receiverId, senderMail, postTopic, type }) => {
     const receiver = getUser(receiverId);
     console.log(`Got an notfictaion. ${senderId} liked ${receiverId} post `);
     socket.to(receiver.socketId).emit('getNotification', {
       senderId,
+      senderMail,
+      postTopic,
       type,
     });
   });
