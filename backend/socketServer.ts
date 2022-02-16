@@ -1,14 +1,21 @@
-let users = [];
+import { Socket } from 'socket.io';
 
-const addNewNuser = (id, socketId) => !users.some((user) => user.userId === id) && users.push({ userId: id, socketId });
+interface IuserSocketObj {
+  userId: string;
+  socketId: string;
+}
+let users: Array<IuserSocketObj> = [];
 
-const getUser = (userId) => users.find((user) => user.userId === userId);
+const addNewNuser = (id: string, socketId: string) =>
+  !users.some((user) => user.userId === id) && users.push({ userId: id, socketId });
 
-const removeUser = (socketId) => {
+const getUser = (userId: string) => users.find((user) => user.userId === userId);
+
+const removeUser = (socketId: string) => {
   users = users.filter((user) => user.socketId !== socketId);
 };
 
-const SocketServer = (socket) => {
+const SocketServer = (socket: Socket) => {
   // Connect - Disconnect
   socket.on('joinUser', (id) => {
     addNewNuser(id, socket.id);
@@ -20,7 +27,7 @@ const SocketServer = (socket) => {
   socket.on('sendNotification', ({ senderId, receiverId, senderMail, postTopic, type }) => {
     const receiver = getUser(receiverId);
     console.log(`Got an notfictaion. ${senderId} liked ${receiverId} post `);
-    socket.to(receiver.socketId).emit('getNotification', {
+    socket.to(receiver?.socketId || '').emit('getNotification', {
       senderId,
       senderMail,
       postTopic,
@@ -35,4 +42,4 @@ const SocketServer = (socket) => {
   });
 };
 
-module.exports = SocketServer;
+export default SocketServer;

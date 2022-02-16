@@ -1,10 +1,11 @@
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const bcrypt = require('bcrypt');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-const SocketServer = require('./socketServer.js');
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import bcrypt from 'bcrypt';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import SocketServer from './socketServer';
+import { IUser, IPost, ILikeObj, IComment } from './interfaces';
 
 const app = express();
 const httpServer = createServer(app);
@@ -20,6 +21,8 @@ io.on('connection', (socket) => {
   SocketServer(socket);
 });
 
+const __dirname = path.resolve();
+
 const DATA_FILE = path.join(__dirname, 'data/users.json');
 const POSTS_DATA_FILE = path.join(__dirname, 'data/posts.json');
 const COMMENTS_DATA_FILE = path.join(__dirname, 'data/comments.json');
@@ -31,29 +34,29 @@ app.get('/', (req, res) => {
 
 app.get('/api/users', (req, res) => {
   const data = fs.readFileSync(DATA_FILE);
-  res.json(JSON.parse(data));
+  res.json(JSON.parse(data.toString()));
 });
 
 app.post('/api/users/register', async (req, res) => {
-  const users = JSON.parse(fs.readFileSync(DATA_FILE));
+  const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
   try {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-    const newUser = {
+    const newUser: IUser = {
       id: req.body.id,
       userName: req.body.userName,
       email: req.body.email,
       password: hashedPassword,
     };
 
-    const alreadyRegisteredUser = users.some((user) => user.email === newUser.email);
+    const alreadyRegisteredUser = users.some((user: IUser) => user.email === newUser.email);
 
     if (!alreadyRegisteredUser) {
       users.push(newUser);
       fs.writeFileSync(DATA_FILE, JSON.stringify(users));
 
-      const userResponse = { ...newUser };
+      const userResponse: Partial<IUser> = { ...newUser };
       delete userResponse.password;
 
       res.status(201).json({ user: userResponse });
@@ -68,9 +71,9 @@ app.post('/api/users/register', async (req, res) => {
 
 app.post('/api/users/login', (req, res, next) => {
   const { email, password } = req.body;
-  const users = JSON.parse(fs.readFileSync(DATA_FILE));
+  const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
 
-  const registeredUser = users.find((user) => user.email === email);
+  const registeredUser = users.find((user: IUser) => user.email === email);
 
   if (registeredUser) {
     bcrypt
@@ -106,13 +109,13 @@ app.get('/api/posts', (req, res) => {
   const data = fs.readFileSync(POSTS_DATA_FILE);
   // using setTimeout so that the loader appears before loading data, like mocking a database.
   setTimeout(() => {
-    res.json({ posts: JSON.parse(data) });
+    res.json({ posts: JSON.parse(data.toString()) });
   }, 3000);
 });
 
 app.post('/api/posts', (req, res) => {
   const { id, postUserInfo, title, content } = req.body;
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
   const newPost = {
     id,
@@ -124,7 +127,7 @@ app.post('/api/posts', (req, res) => {
   };
 
   const isNewPostAlreadyWritten = posts.some(
-    (post) => post.postUserInfo.id === newPost.postUserInfo.id && post.title === title
+    (post: IPost) => post.postUserInfo.id === newPost.postUserInfo.id && post.title === title
   );
 
   if (isNewPostAlreadyWritten) {
@@ -143,9 +146,9 @@ app.post('/api/posts', (req, res) => {
 
 app.put('/api/posts/:id', (req, res) => {
   const { postUserInfo, title, content } = req.body;
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const foundPostIndex = posts.findIndex((post) => post.id === req.params.id);
+  const foundPostIndex = posts.findIndex((post: IPost) => post.id === req.params.id);
 
   if (foundPostIndex !== -1) {
     if (posts[foundPostIndex].postUserInfo.id !== postUserInfo.id) {
@@ -166,9 +169,9 @@ app.put('/api/posts/:id', (req, res) => {
 });
 
 app.get('/api/posts/:id', (req, res) => {
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const foundPost = posts.find((post) => post.id === req.params.id);
+  const foundPost = posts.find((post: IPost) => post.id === req.params.id);
 
   if (foundPost) {
     res.json(foundPost);
@@ -178,9 +181,9 @@ app.get('/api/posts/:id', (req, res) => {
 });
 
 app.delete('/api/posts/:id', (req, res) => {
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const filteredPosts = posts.filter((post) => post.id !== req.params.id);
+  const filteredPosts = posts.filter((post: IPost) => post.id !== req.params.id);
 
   fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(filteredPosts));
   res.json({ message: 'Post removed', postId: req.params.id });
@@ -188,14 +191,14 @@ app.delete('/api/posts/:id', (req, res) => {
 
 // -----------------------------------------------
 app.get('/api/posts/:postId/comments', (req, res) => {
-  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
-  const users = JSON.parse(fs.readFileSync(DATA_FILE));
+  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
+  const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
 
-  const filteredComments = comments.filter((comment) => comment.postId === req.params.postId);
+  const filteredComments = comments.filter((comment: IComment) => comment.postId === req.params.postId);
 
   // populate userInfo for the comments
-  const userPopulatedComments = filteredComments.map((comment) => {
-    const commentUser = users.find((user) => user.id === comment.userId);
+  const userPopulatedComments = filteredComments.map((comment: IComment) => {
+    const commentUser = users.find((user: IUser) => user.id === comment.userId);
     return {
       ...comment,
       userInfo: {
@@ -212,7 +215,7 @@ app.get('/api/posts/:postId/comments', (req, res) => {
 
 app.post('/api/posts/:postId/comments', (req, res) => {
   const { id, text, creationDate, userId } = req.body;
-  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
+  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
 
   const { postId } = req.params;
 
@@ -225,10 +228,10 @@ app.post('/api/posts/:postId/comments', (req, res) => {
   };
 
   const isNewCommentAlreadyWritten = comments.some(
-    (comment) => comment.userId === newComment.userId && comment.text === newComment.text
+    (comment: IComment) => comment.userId === newComment.userId && comment.text === newComment.text
   );
 
-  const isCommentWritteOnSamePost = comments.some((comment) => comment.postId === newComment.postId);
+  const isCommentWritteOnSamePost = comments.some((comment: IComment) => comment.postId === newComment.postId);
 
   if (isNewCommentAlreadyWritten && isCommentWritteOnSamePost) {
     res.status(400);
@@ -239,9 +242,9 @@ app.post('/api/posts/:postId/comments', (req, res) => {
   fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(comments));
 
   // When adding a comment increase comment count
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const commentedOnPostId = posts.findIndex((post) => post.id === postId);
+  const commentedOnPostId = posts.findIndex((post: IPost) => post.id === postId);
 
   const updatedPost = {
     ...posts[commentedOnPostId],
@@ -256,9 +259,9 @@ app.post('/api/posts/:postId/comments', (req, res) => {
 });
 
 app.delete('/api/posts/:postId/comments/:id', (req, res) => {
-  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE));
+  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
 
-  const filteredComments = comments.filter((comment) => comment.id !== req.params.id);
+  const filteredComments = comments.filter((comment: IComment) => comment.id !== req.params.id);
 
   fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(filteredComments));
   res.json({ message: 'Comment removed', commentId: req.params.id });
@@ -266,11 +269,13 @@ app.delete('/api/posts/:postId/comments/:id', (req, res) => {
 
 // ----------------------------------------------
 app.post('/api/posts/:postId/like', (req, res) => {
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
-  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE));
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
+  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE).toString());
 
   const { userId } = req.body;
-  const isPostLikedByUser = likes.some((likeObj) => likeObj.userId === userId && likeObj.postId === req.params.postId);
+  const isPostLikedByUser = likes.some(
+    (likeObj: ILikeObj) => likeObj.userId === userId && likeObj.postId === req.params.postId
+  );
 
   if (!isPostLikedByUser) {
     // if the user didn't like the post, add userId & postId to likes and increment likesCount inside that post
@@ -281,7 +286,7 @@ app.post('/api/posts/:postId/like', (req, res) => {
 
     fs.writeFileSync(LIKES_DATA_FILE, JSON.stringify(likes));
 
-    const likedPostId = posts.findIndex((post) => post.id === req.params.postId);
+    const likedPostId = posts.findIndex((post: IPost) => post.id === req.params.postId);
 
     const updatedPost = {
       ...posts[likedPostId],
@@ -299,24 +304,26 @@ app.post('/api/posts/:postId/like', (req, res) => {
 });
 
 app.post('/api/posts/:postId/unlike', (req, res) => {
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE));
-  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE));
+  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
+  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE).toString());
 
   const { userId } = req.body;
-  const isPostLikedByUser = likes.some((likeObj) => likeObj.userId === userId && likeObj.postId === req.params.postId);
+  const isPostLikedByUser = likes.some(
+    (likeObj: ILikeObj) => likeObj.userId === userId && likeObj.postId === req.params.postId
+  );
 
   if (!isPostLikedByUser) {
     return res.status(400).json({ errorMessage: 'Post is not liked' });
   }
   // if the like exists remove the like from LIKES_DATA_FILE
   const filteredLikesObjs = likes.filter(
-    (likeObj) => likeObj.postId !== req.params.postId && likeObj.userId !== req.body.userId
+    (likeObj: ILikeObj) => likeObj.postId !== req.params.postId && likeObj.userId !== req.body.userId
   );
 
   fs.writeFileSync(LIKES_DATA_FILE, JSON.stringify(filteredLikesObjs));
 
   // decrement likesCount inside that post
-  const unlikedPostId = posts.findIndex((post) => post.id === req.params.postId);
+  const unlikedPostId = posts.findIndex((post: IPost) => post.id === req.params.postId);
 
   const updatedPost = {
     ...posts[unlikedPostId],
@@ -330,25 +337,25 @@ app.post('/api/posts/:postId/unlike', (req, res) => {
 });
 
 app.get('/api/users/:userId/likedPosts', (req, res) => {
-  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE));
+  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE).toString());
 
-  const filteredLikes = likes.filter((likeObj) => likeObj.userId === req.params.userId);
+  const filteredLikes = likes.filter((likeObj: ILikeObj) => likeObj.userId === req.params.userId);
 
-  const userLikedPostsIds = filteredLikes.map((likeObj) => likeObj.postId);
+  const userLikedPostsIds = filteredLikes.map((likeObj: ILikeObj) => likeObj.postId);
   return res.json({
     userLikedPosts: userLikedPostsIds,
   });
 });
 
 // ----------------------------------------------
-const notFound = (req, res, next) => {
+const notFound = (req: any, res: any, next: any) => {
   console.log('NOT FOUND ERROR');
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
 };
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err: any, req: any, res: any, next: any) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
 
   res.status(statusCode).json({
