@@ -4,12 +4,18 @@ import path from 'path';
 import bcrypt from 'bcrypt';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import dotenv from 'dotenv';
 import SocketServer from './socketServer';
 import { IUser, IPost, ILikeObj, IComment } from './interfaces';
+import { connectDB } from './config/db';
+
+dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
 app.use(express.json());
+
+connectDB();
 
 const io = new Server(httpServer, {
   cors: {
@@ -20,8 +26,6 @@ const io = new Server(httpServer, {
 io.on('connection', (socket) => {
   SocketServer(socket);
 });
-
-const __dirname = path.resolve();
 
 const DATA_FILE = path.join(__dirname, 'data/users.json');
 const POSTS_DATA_FILE = path.join(__dirname, 'data/posts.json');
