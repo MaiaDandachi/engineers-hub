@@ -1,4 +1,6 @@
+import path from 'path';
 import { createConnection, Connection } from 'typeorm';
+import { User } from '../entities/User';
 
 export const connectDB = async () => {
   try {
@@ -9,7 +11,7 @@ export const connectDB = async () => {
       database: 'engineershub',
       synchronize: true,
       logging: true,
-      entities: ['../entities/**/*.ts'],
+      entities: [path.join(__dirname, '../entities/*.ts')],
     });
 
     console.log('Connected to DB ✔ ');

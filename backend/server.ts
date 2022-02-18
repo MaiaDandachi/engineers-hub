@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import SocketServer from './socketServer';
 import { IUser, IPost, ILikeObj, IComment } from './interfaces';
 import { connectDB } from './config/db';
+import userRoutes from './routes/userRoutes';
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ const httpServer = createServer(app);
 app.use(express.json());
 
 connectDB();
+
+app.use('/api/users', userRoutes);
 
 const io = new Server(httpServer, {
   cors: {
@@ -36,78 +39,78 @@ app.get('/', (req, res) => {
   res.send('API IS RUNNING...');
 });
 
-app.get('/api/users', (req, res) => {
-  const data = fs.readFileSync(DATA_FILE);
-  res.json(JSON.parse(data.toString()));
-});
+// app.get('/api/users', (req, res) => {
+//   const data = fs.readFileSync(DATA_FILE);
+//   res.json(JSON.parse(data.toString()));
+// });
 
-app.post('/api/users/register', async (req, res) => {
-  const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
-  try {
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+// app.post('/api/users/register', async (req, res) => {
+//   const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
+//   try {
+//     const salt = await bcrypt.genSalt(10);
+//     const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-    const newUser: IUser = {
-      id: req.body.id,
-      userName: req.body.userName,
-      email: req.body.email,
-      password: hashedPassword,
-    };
+//     const newUser: IUser = {
+//       id: req.body.id,
+//       userName: req.body.userName,
+//       email: req.body.email,
+//       password: hashedPassword,
+//     };
 
-    const alreadyRegisteredUser = users.some((user: IUser) => user.email === newUser.email);
+//     const alreadyRegisteredUser = users.some((user: IUser) => user.email === newUser.email);
 
-    if (!alreadyRegisteredUser) {
-      users.push(newUser);
-      fs.writeFileSync(DATA_FILE, JSON.stringify(users));
+//     if (!alreadyRegisteredUser) {
+//       users.push(newUser);
+//       fs.writeFileSync(DATA_FILE, JSON.stringify(users));
 
-      const userResponse: Partial<IUser> = { ...newUser };
-      delete userResponse.password;
+//       const userResponse: Partial<IUser> = { ...newUser };
+//       delete userResponse.password;
 
-      res.status(201).json({ user: userResponse });
-    } else {
-      res.status(401);
-      throw new Error('User already exists');
-    }
-  } catch (err) {
-    throw new Error('Could not hash the user password');
-  }
-});
+//       res.status(201).json({ user: userResponse });
+//     } else {
+//       res.status(401);
+//       throw new Error('User already exists');
+//     }
+//   } catch (err) {
+//     throw new Error('Could not hash the user password');
+//   }
+// });
 
-app.post('/api/users/login', (req, res, next) => {
-  const { email, password } = req.body;
-  const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
+// app.post('/api/users/login', (req, res, next) => {
+//   const { email, password } = req.body;
+//   const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
 
-  const registeredUser = users.find((user: IUser) => user.email === email);
+//   const registeredUser = users.find((user: IUser) => user.email === email);
 
-  if (registeredUser) {
-    bcrypt
-      .compare(password, registeredUser.password)
-      .then((isMatch) => {
-        let isPasswordInvalid = false;
+//   if (registeredUser) {
+//     bcrypt
+//       .compare(password, registeredUser.password)
+//       .then((isMatch) => {
+//         let isPasswordInvalid = false;
 
-        if (isMatch) {
-          delete registeredUser.password;
-          res.json({ user: registeredUser });
-        } else {
-          isPasswordInvalid = true;
-        }
+//         if (isMatch) {
+//           delete registeredUser.password;
+//           res.json({ user: registeredUser });
+//         } else {
+//           isPasswordInvalid = true;
+//         }
 
-        // if the compare between the 2 passwords was not match
-        if (isPasswordInvalid) {
-          res.status(401);
-          throw new Error('Invalid password');
-        }
-      })
-      .catch((err) => {
-        // let the custom error middleware handle it.
-        next(err);
-      });
-  } else {
-    // if the user is not registered with the given email.
-    res.status(401);
-    throw new Error('Invalid email');
-  }
-});
+//         // if the compare between the 2 passwords was not match
+//         if (isPasswordInvalid) {
+//           res.status(401);
+//           throw new Error('Invalid password');
+//         }
+//       })
+//       .catch((err) => {
+//         // let the custom error middleware handle it.
+//         next(err);
+//       });
+//   } else {
+//     // if the user is not registered with the given email.
+//     res.status(401);
+//     throw new Error('Invalid email');
+//   }
+// });
 //-------------------------------------------------------
 app.get('/api/posts', (req, res) => {
   const data = fs.readFileSync(POSTS_DATA_FILE);
