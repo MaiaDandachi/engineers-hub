@@ -1,4 +1,16 @@
-import { Entity, BaseEntity, Column, CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { KeyLike } from 'crypto';
+import {
+  Entity,
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  PrimaryGeneratedColumn,
+  OneToMany,
+} from 'typeorm';
+import { Like } from './Like';
+import { Post } from './Post';
+import { Comment } from './Comment';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -19,4 +31,13 @@ export class User extends BaseEntity {
 
   @UpdateDateColumn()
   updated_at!: Date;
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
+
+  @OneToMany(() => Like, (like) => like.user)
+  likes: Like[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  comments: Comment[];
 }
