@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 
 import { Post } from '../entities/Post';
 import { User } from '../entities/User';
+import { Like } from '../entities/Like';
 
 //@desc Get all posts
 //@route GET /api/posts
@@ -112,4 +113,63 @@ const deletePost = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-export { getPosts, createPost, getPostById, updatePost, deletePost };
+//@desc Like a post
+//@route GET /api/posts/:id/like
+//@access private
+const likePost = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const user = (await User.findOne(req.currentUser?.id)) as User;
+
+  const postToBeLiked = await Post.findOne({ id }, { relations: ['user'] });
+
+  if (!postToBeLiked) {
+    res.status(404).send({ message: 'Post does not exist.' });
+    return;
+  }
+
+  const isPostLikedByUser = await Like.findOne({ user, post: postToBeLiked });
+
+  if (isPostLikedByUser && Object.keys(isPostLikedByUser).length > 0) {
+    res.status(400).send({ message: 'You already liked this post' });
+    return;
+  }
+
+  // add a like to the Like table with userId and postId reference.
+  const like = new Like();
+  like.user = user;
+  like.post = postToBeLiked;
+  await like.save();
+
+  res.send({ post: postToBeLiked });
+});
+
+//@desc Unlike a post
+//@route GET /api/posts/:id/unlike
+//@access private
+const unlikePost = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const user = (await User.findOne(req.currentUser?.id)) as User;
+
+  const unlikedPost = await Post.findOne({ id }, { relations: ['user'] });
+
+  if (!unlikedPost) {
+    res.status(404).send({ message: 'Post does not exist.' });
+    return;
+  }
+
+  const isPostLikedByUser = await Like.findOne({ user, post: unlikedPost });
+
+  if (isPostLikedByUser && Object.keys(isPostLikedByUser).length > 0) {
+    // remove the like from Like table.
+    await Like.delete({ user, post: unlikedPost });
+
+    res.send({ post: unlikedPost });
+    return;
+  }
+
+  res.status(400).send({ message: 'Post is not liked' });
+});
+
+export { getPosts, createPost, getPostById, updatePost, deletePost, likePost, unlikePost };
