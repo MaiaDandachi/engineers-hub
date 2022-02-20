@@ -9,6 +9,7 @@ import SocketServer from './socketServer';
 import { IUser, IPost, ILikeObj, IComment } from './interfaces';
 import { connectDB } from './config/db';
 import userRoutes from './routes/userRoutes';
+import postRoutes from './routes/postRoutes';
 
 dotenv.config();
 
@@ -19,7 +20,9 @@ app.use(express.json());
 connectDB();
 
 app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
 
+//-----------------------------------------
 const io = new Server(httpServer, {
   cors: {
     origin: 'http://localhost:3000',
@@ -35,9 +38,9 @@ const POSTS_DATA_FILE = path.join(__dirname, 'data/posts.json');
 const COMMENTS_DATA_FILE = path.join(__dirname, 'data/comments.json');
 const LIKES_DATA_FILE = path.join(__dirname, 'data/likes.json');
 
-app.get('/', (req, res) => {
-  res.send('API IS RUNNING...');
-});
+// app.get('/', (req, res) => {
+//   res.send('API IS RUNNING...');
+// });
 
 // app.get('/api/users', (req, res) => {
 //   const data = fs.readFileSync(DATA_FILE);
@@ -112,89 +115,89 @@ app.get('/', (req, res) => {
 //   }
 // });
 //-------------------------------------------------------
-app.get('/api/posts', (req, res) => {
-  const data = fs.readFileSync(POSTS_DATA_FILE);
-  // using setTimeout so that the loader appears before loading data, like mocking a database.
-  setTimeout(() => {
-    res.json({ posts: JSON.parse(data.toString()) });
-  }, 3000);
-});
+// app.get('/api/posts', (req, res) => {
+//   const data = fs.readFileSync(POSTS_DATA_FILE);
+//   // using setTimeout so that the loader appears before loading data, like mocking a database.
+//   setTimeout(() => {
+//     res.json({ posts: JSON.parse(data.toString()) });
+//   }, 3000);
+// });
 
-app.post('/api/posts', (req, res) => {
-  const { id, postUserInfo, title, content } = req.body;
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
+// app.post('/api/posts', (req, res) => {
+//   const { id, postUserInfo, title, content } = req.body;
+//   const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const newPost = {
-    id,
-    postUserInfo,
-    title,
-    content,
-    commentsCount: 0,
-    likesCount: 0,
-  };
+//   const newPost = {
+//     id,
+//     postUserInfo,
+//     title,
+//     content,
+//     commentsCount: 0,
+//     likesCount: 0,
+//   };
 
-  const isNewPostAlreadyWritten = posts.some(
-    (post: IPost) => post.postUserInfo.id === newPost.postUserInfo.id && post.title === title
-  );
+//   const isNewPostAlreadyWritten = posts.some(
+//     (post: IPost) => post.postUserInfo.id === newPost.postUserInfo.id && post.title === title
+//   );
 
-  if (isNewPostAlreadyWritten) {
-    res.status(400);
-    throw new Error('Post already exists');
-  }
+//   if (isNewPostAlreadyWritten) {
+//     res.status(400);
+//     throw new Error('Post already exists');
+//   }
 
-  posts.push(newPost);
-  fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+//   posts.push(newPost);
+//   fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
 
-  // const responsePost = { ...newPost };
-  // delete responsePost.postUserInfo;
+//   // const responsePost = { ...newPost };
+//   // delete responsePost.postUserInfo;
 
-  res.status(201).json({ post: newPost });
-});
+//   res.status(201).json({ post: newPost });
+// });
 
-app.put('/api/posts/:id', (req, res) => {
-  const { postUserInfo, title, content } = req.body;
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
+// app.put('/api/posts/:id', (req, res) => {
+//   const { postUserInfo, title, content } = req.body;
+//   const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const foundPostIndex = posts.findIndex((post: IPost) => post.id === req.params.id);
+//   const foundPostIndex = posts.findIndex((post: IPost) => post.id === req.params.id);
 
-  if (foundPostIndex !== -1) {
-    if (posts[foundPostIndex].postUserInfo.id !== postUserInfo.id) {
-      res.status(401);
-      throw new Error('logged in user is not the post owner.');
-    }
-    const updatedPost = { ...posts[foundPostIndex], title, content };
-    posts[foundPostIndex] = updatedPost;
-    fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+//   if (foundPostIndex !== -1) {
+//     if (posts[foundPostIndex].postUserInfo.id !== postUserInfo.id) {
+//       res.status(401);
+//       throw new Error('logged in user is not the post owner.');
+//     }
+//     const updatedPost = { ...posts[foundPostIndex], title, content };
+//     posts[foundPostIndex] = updatedPost;
+//     fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
 
-    // delete updatedPost.postUserInfo;
+//     // delete updatedPost.postUserInfo;
 
-    res.json({ post: updatedPost });
-  } else {
-    res.status(404);
-    throw new Error('Post not found');
-  }
-});
+//     res.json({ post: updatedPost });
+//   } else {
+//     res.status(404);
+//     throw new Error('Post not found');
+//   }
+// });
 
-app.get('/api/posts/:id', (req, res) => {
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
+// app.get('/api/posts/:id', (req, res) => {
+//   const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const foundPost = posts.find((post: IPost) => post.id === req.params.id);
+//   const foundPost = posts.find((post: IPost) => post.id === req.params.id);
 
-  if (foundPost) {
-    res.json(foundPost);
-  } else {
-    res.status(404).json({ errorMessage: 'Post not found!' });
-  }
-});
+//   if (foundPost) {
+//     res.json(foundPost);
+//   } else {
+//     res.status(404).json({ errorMessage: 'Post not found!' });
+//   }
+// });
 
-app.delete('/api/posts/:id', (req, res) => {
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
+// app.delete('/api/posts/:id', (req, res) => {
+//   const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const filteredPosts = posts.filter((post: IPost) => post.id !== req.params.id);
+//   const filteredPosts = posts.filter((post: IPost) => post.id !== req.params.id);
 
-  fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(filteredPosts));
-  res.json({ message: 'Post removed', postId: req.params.id });
-});
+//   fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(filteredPosts));
+//   res.json({ message: 'Post removed', postId: req.params.id });
+// });
 
 // -----------------------------------------------
 app.get('/api/posts/:postId/comments', (req, res) => {
