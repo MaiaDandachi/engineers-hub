@@ -1,7 +1,7 @@
 import express from 'express';
 import { check } from 'express-validator';
-import { registerUser, loginUser, getUsers } from '../controllers/userController';
-import { protect } from '../middleware/authMiddleware.js';
+import { registerUser, loginUser, getUsers, getUserLikedPosts } from '../controllers/userController';
+import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
 router.route('/').get(getUsers);
@@ -18,5 +18,6 @@ router
   );
 
 router.route('/login').post(loginUser);
+router.route('/:id/likedPosts').get(protect, getUserLikedPosts);
 
 export default router;

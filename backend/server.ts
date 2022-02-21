@@ -346,16 +346,16 @@ app.delete('/api/posts/:postId/comments/:id', (req, res) => {
 //   return res.status(201).json({ post: posts[unlikedPostId] });
 // });
 
-app.get('/api/users/:userId/likedPosts', (req, res) => {
-  const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE).toString());
+// app.get('/api/users/:userId/likedPosts', (req, res) => {
+//   const likes = JSON.parse(fs.readFileSync(LIKES_DATA_FILE).toString());
 
-  const filteredLikes = likes.filter((likeObj: ILikeObj) => likeObj.userId === req.params.userId);
+//   const filteredLikes = likes.filter((likeObj: ILikeObj) => likeObj.userId === req.params.userId);
 
-  const userLikedPostsIds = filteredLikes.map((likeObj: ILikeObj) => likeObj.postId);
-  return res.json({
-    userLikedPosts: userLikedPostsIds,
-  });
-});
+//   const userLikedPostsIds = filteredLikes.map((likeObj: ILikeObj) => likeObj.postId);
+//   return res.json({
+//     userLikedPosts: userLikedPostsIds,
+//   });
+// });
 
 // ----------------------------------------------
 const notFound = (req: any, res: any, next: any) => {

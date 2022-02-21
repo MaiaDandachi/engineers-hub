@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import { validationResult } from 'express-validator';
 
 import { User } from '../entities/User';
+import { Like } from '../entities/Like';
 import generateToken from '../utils/generateToken';
 
 //@desc Register A User
@@ -83,4 +84,33 @@ const getUsers = asyncHandler(async (req: Request, res: Response) => {
   res.json({ users });
 });
 
-export { registerUser, loginUser, getUsers };
+//@desc Get user's liked posts
+//@route GET /api/users/:id/likedPosts
+//@access private
+const getUserLikedPosts = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const user = await User.findOne({ id });
+
+  if (user) {
+    if (user.id === req.currentUser?.id) {
+      const likedPosts = await Like.createQueryBuilder('like')
+        .leftJoin('like.user', 'user')
+        .leftJoinAndSelect('like.post', 'post')
+        .where('user.id = :id', { id })
+        .getMany();
+      // .addSelect('post.id')
+
+      const likedPostIds = likedPosts.map((likeObj) => likeObj.post.id);
+      res.send({ userLikedPosts: likedPostIds });
+    } else {
+      res.status(401);
+      throw new Error('logged in user have no access to the liked posts');
+    }
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
+export { registerUser, loginUser, getUsers, getUserLikedPosts };
