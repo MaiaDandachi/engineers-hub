@@ -10,6 +10,7 @@ import { IUser, IPost, ILikeObj, IComment } from './interfaces';
 import { connectDB } from './config/db';
 import userRoutes from './routes/userRoutes';
 import postRoutes from './routes/postRoutes';
+import commentRoutes from './routes/commentRoutes';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ connectDB();
 
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes);
 
 //-----------------------------------------
 const io = new Server(httpServer, {
@@ -33,10 +35,10 @@ io.on('connection', (socket) => {
   SocketServer(socket);
 });
 
-const DATA_FILE = path.join(__dirname, 'data/users.json');
-const POSTS_DATA_FILE = path.join(__dirname, 'data/posts.json');
-const COMMENTS_DATA_FILE = path.join(__dirname, 'data/comments.json');
-const LIKES_DATA_FILE = path.join(__dirname, 'data/likes.json');
+// const DATA_FILE = path.join(__dirname, 'data/users.json');
+// const POSTS_DATA_FILE = path.join(__dirname, 'data/posts.json');
+// const COMMENTS_DATA_FILE = path.join(__dirname, 'data/comments.json');
+// const LIKES_DATA_FILE = path.join(__dirname, 'data/likes.json');
 
 // app.get('/', (req, res) => {
 //   res.send('API IS RUNNING...');
@@ -200,82 +202,82 @@ const LIKES_DATA_FILE = path.join(__dirname, 'data/likes.json');
 // });
 
 // -----------------------------------------------
-app.get('/api/posts/:postId/comments', (req, res) => {
-  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
-  const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
+// app.get('/api/posts/:postId/comments', (req, res) => {
+//   const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
+//   const users = JSON.parse(fs.readFileSync(DATA_FILE).toString());
 
-  const filteredComments = comments.filter((comment: IComment) => comment.postId === req.params.postId);
+//   const filteredComments = comments.filter((comment: IComment) => comment.postId === req.params.postId);
 
-  // populate userInfo for the comments
-  const userPopulatedComments = filteredComments.map((comment: IComment) => {
-    const commentUser = users.find((user: IUser) => user.id === comment.userId);
-    return {
-      ...comment,
-      userInfo: {
-        ...commentUser,
-      },
-    };
-  });
+//   // populate userInfo for the comments
+//   const userPopulatedComments = filteredComments.map((comment: IComment) => {
+//     const commentUser = users.find((user: IUser) => user.id === comment.userId);
+//     return {
+//       ...comment,
+//       userInfo: {
+//         ...commentUser,
+//       },
+//     };
+//   });
 
-  // using setTimeout so that the loader appears before loading data, like mocking a database.
-  setTimeout(() => {
-    res.json({ comments: userPopulatedComments });
-  }, 2000);
-});
+//   // using setTimeout so that the loader appears before loading data, like mocking a database.
+//   setTimeout(() => {
+//     res.json({ comments: userPopulatedComments });
+//   }, 2000);
+// });
 
-app.post('/api/posts/:postId/comments', (req, res) => {
-  const { id, text, creationDate, userId } = req.body;
-  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
+// app.post('/api/posts/:postId/comments', (req, res) => {
+//   const { id, text, creationDate, userId } = req.body;
+//   const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
 
-  const { postId } = req.params;
+//   const { postId } = req.params;
 
-  const newComment = {
-    id,
-    postId,
-    text,
-    creationDate,
-    userId,
-  };
+//   const newComment = {
+//     id,
+//     postId,
+//     text,
+//     creationDate,
+//     userId,
+//   };
 
-  const isNewCommentAlreadyWritten = comments.some(
-    (comment: IComment) => comment.userId === newComment.userId && comment.text === newComment.text
-  );
+//   const isNewCommentAlreadyWritten = comments.some(
+//     (comment: IComment) => comment.userId === newComment.userId && comment.text === newComment.text
+//   );
 
-  const isCommentWritteOnSamePost = comments.some((comment: IComment) => comment.postId === newComment.postId);
+//   const isCommentWritteOnSamePost = comments.some((comment: IComment) => comment.postId === newComment.postId);
 
-  if (isNewCommentAlreadyWritten && isCommentWritteOnSamePost) {
-    res.status(400);
-    throw new Error('You have already commented on the post');
-  }
+//   if (isNewCommentAlreadyWritten && isCommentWritteOnSamePost) {
+//     res.status(400);
+//     throw new Error('You have already commented on the post');
+//   }
 
-  comments.push(newComment);
-  fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(comments));
+//   comments.push(newComment);
+//   fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(comments));
 
-  // When adding a comment increase comment count
-  const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
+//   // When adding a comment increase comment count
+//   const posts = JSON.parse(fs.readFileSync(POSTS_DATA_FILE).toString());
 
-  const commentedOnPostId = posts.findIndex((post: IPost) => post.id === postId);
+//   const commentedOnPostId = posts.findIndex((post: IPost) => post.id === postId);
 
-  const updatedPost = {
-    ...posts[commentedOnPostId],
-    commentsCount: posts[commentedOnPostId].commentsCount + 1,
-  };
+//   const updatedPost = {
+//     ...posts[commentedOnPostId],
+//     commentsCount: posts[commentedOnPostId].commentsCount + 1,
+//   };
 
-  posts[commentedOnPostId] = updatedPost;
+//   posts[commentedOnPostId] = updatedPost;
 
-  fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
+//   fs.writeFileSync(POSTS_DATA_FILE, JSON.stringify(posts));
 
-  res.status(201).json({ comment: newComment });
-});
+//   res.status(201).json({ comment: newComment });
+// });
 
-app.delete('/api/posts/:postId/comments/:id', (req, res) => {
-  const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
+// app.delete('/api/posts/:postId/comments/:id', (req, res) => {
+//   const comments = JSON.parse(fs.readFileSync(COMMENTS_DATA_FILE).toString());
 
-  const filteredComments = comments.filter((comment: IComment) => comment.id !== req.params.id);
+//   const filteredComments = comments.filter((comment: IComment) => comment.id !== req.params.id);
 
-  fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(filteredComments));
-  res.json({ message: 'Comment removed', commentId: req.params.id });
-});
+//   fs.writeFileSync(COMMENTS_DATA_FILE, JSON.stringify(filteredComments));
+//   res.json({ message: 'Comment removed', commentId: req.params.id });
+// });
 
 // ----------------------------------------------
 // app.post('/api/posts/:postId/like', (req, res) => {

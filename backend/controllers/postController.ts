@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { Post } from '../entities/Post';
 import { User } from '../entities/User';
 import { Like } from '../entities/Like';
+import { Comment } from '../entities/Comment';
 
 //@desc Get all posts
 //@route GET /api/posts
@@ -172,4 +173,26 @@ const unlikePost = asyncHandler(async (req: Request, res: Response) => {
   res.status(400).send({ message: 'Post is not liked' });
 });
 
-export { getPosts, createPost, getPostById, updatePost, deletePost, likePost, unlikePost };
+//@desc Get all comments for a post
+//@route GET /api/posts/:id/comments
+//@access private
+const getComments = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const post = await Post.findOne({ id });
+
+  if (!post) {
+    res.status(404).send({ message: 'Post does not exist' });
+    return;
+  }
+
+  const comments = await Comment.createQueryBuilder('comment')
+    .leftJoinAndSelect('comment.post', 'post')
+    .where('post.id = :id', { id })
+    .leftJoinAndSelect('comment.user', 'user')
+    .getMany();
+
+  res.json({ comments });
+});
+
+export { getPosts, createPost, getPostById, updatePost, deletePost, likePost, unlikePost, getComments };
